@@ -68,7 +68,7 @@ class AuthController extends BaseController
     public function refresh() {
         $success = $this->respondWithToken(auth()->refresh());
 
-        return $this->sendResponse($success, 'Profile Fetched Successfully');
+        return $this->sendResponse($success, 'Token Fetched Successfully');
     }
 
 //    logout function

@@ -17,7 +17,7 @@ Route::group([
     Route::put('account/password', [AuthController::class, 'updatePassword']);
     Route::delete('account/delete', [AuthController::class, 'deleteAccount']);
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
-    Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
+    Route::get('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api');
     Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:api');
 });
 
