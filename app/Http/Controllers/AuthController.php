@@ -6,30 +6,38 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\BaseController;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\Role;
 
 class AuthController extends BaseController
 {
     // register function
-   public function register(Request $request) {
+    public function register(Request $request)
+{
     $validator = Validator::make($request->all(), [
         'name' => 'required',
-        'email' => 'required',
+        'email' => 'required|email|unique:users',
         'password' => 'required',
         'c_password' => 'required|same:password',
     ]);
 
-    if($validator->fails()){
+    if ($validator->fails()) {
         return $this->sendError('Validation Error.', $validator->errors());
     }
 
     $input = $request->all();
-    $input['password'] =  bcrypt($input['password']);
+    $input['password'] = bcrypt($input['password']);
     $user = User::create($input);
+
+    // Assign default role (e.g., 'Guest') to the user
+    $defaultRole = Role::where('name', 'Guest')->first();
+    if ($defaultRole) {
+        $user->roles()->attach($defaultRole->id);
+    }
 
     $success['user'] = $user;
 
     return $this->sendResponse($success, 'User Registered Successfully.');
-   }
+}
 
 //    login function
    public function login() {
