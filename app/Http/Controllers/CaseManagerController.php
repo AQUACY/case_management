@@ -10,17 +10,6 @@ use Illuminate\Support\Str;
 
 class CaseManagerController extends Controller
 {
-    <?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\Case;
-use App\Models\User;
-use Illuminate\Support\Str;
-
-class CaseController extends Controller
-{
 
     public function store(Request $request)
     {
@@ -28,6 +17,7 @@ class CaseController extends Controller
         $request->validate([
             'bill' => 'required|numeric',
             'case_manager_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id',  // Validate the user for whom the case is being created
             'description' => 'required|string',
         ]);
 
@@ -39,6 +29,7 @@ class CaseController extends Controller
             'order_number' => $orderNumber,
             'bill' => $request->bill,
             'case_manager_id' => $request->case_manager_id,
+            'user_id' => $request->user_id,  // Assign the user to the case
             'description' => $request->description,
         ]);
 
@@ -49,33 +40,6 @@ class CaseController extends Controller
         ], 201);
     }
 
-    public function store(Request $request)
-    {
-        // Validate request data
-        $request->validate([
-            'bill' => 'required|numeric',
-            'case_manager_id' => 'required|exists:users,id',
-            'description' => 'required|string',
-        ]);
-
-        // Generate unique order number
-        $orderNumber = 'CASE-' . strtoupper(Str::random(8));
-
-        // Create the case
-        $case = Case::create([
-            'order_number' => $orderNumber,
-            'bill' => $request->bill,
-            'case_manager_id' => $request->case_manager_id,
-            'description' => $request->description,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Case created successfully',
-            'data' => $case,
-        ], 201);
-    }
-}
 
     // Assign the case to a case manager
     public function assignCaseManager(Request $request, $caseId)

@@ -23,9 +23,9 @@ Route::group([
 });
 
 Route::middleware(['auth:api', 'role:administrator'])->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/cases', [CaseManagerController::class, 'store']);
-    Route::post('/assign-case-manager/{caseId}', [CaseManagerController::class, 'assignCaseManager']);
+    Route::post('/admin/register', [AuthController::class, 'register']);
+    Route::post('/admin/createcase', [CaseManagerController::class, 'store']);
+    Route::post('/admin/assign-case-manager/{caseId}', [CaseManagerController::class, 'assignCaseManager']);
 });
 
 
