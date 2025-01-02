@@ -10,7 +10,45 @@ use Illuminate\Support\Str;
 
 class CaseManagerController extends Controller
 {
+    // view all cases
+    public function index(Request $request)
+    {
+        // Define how many cases per page
+        $perPage = $request->get('per_page', 10); // Default to 10 cases per page if not specified
 
+        // Fetch paginated cases
+        $cases = Cases::with('caseManager', 'user')
+            ->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cases retrieved successfully.',
+            'data' => $cases
+        ], 200);
+    }
+
+
+// view case by ID
+public function show($id)
+{
+    // Fetch the case by ID, including the case manager and user
+    $case = Cases::with('caseManager', 'user')->find($id);
+
+    // Check if the case exists
+    if (!$case) {
+        return response()->json([
+            'error' => 'Case not found.'
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Case retrieved successfully.',
+        'data' => $case
+    ], 200);
+}
+
+// create and assign case
     public function store(Request $request)
     {
         // Validate request data
@@ -41,22 +79,22 @@ class CaseManagerController extends Controller
     }
 
 
-    // Assign the case to a case manager
-    public function assignCaseManager(Request $request, $caseId)
-    {
-        $validator = Validator::make($request->all(), [
-            'manager_id' => 'required|exists:users,id',
-        ]);
+    // // Assign the case to a case manager
+    // public function assignCaseManager(Request $request, $caseId)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'manager_id' => 'required|exists:users,id',
+    //     ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 422);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => $validator->errors()], 422);
+    //     }
 
-        $case = CaseModel::findOrFail($caseId);
-        $case->assigned_to = $request->manager_id;
-        $case->save();
+    //     $case = Cases::findOrFail($caseId);
+    //     $case->assigned_to = $request->manager_id;
+    //     $case->save();
 
-        return response()->json(['success' => 'Case manager assigned successfully']);
-    }
+    //     return response()->json(['success' => 'Case manager assigned successfully']);
+    // }
 
 }
