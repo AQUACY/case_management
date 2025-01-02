@@ -66,5 +66,10 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->roles->contains('name', $roleName);
     }
+        public function assignedCases()
+    {
+        return $this->hasMany(Cases::class, 'case_manager_id');
+    }
+
 }
 

@@ -9,37 +9,39 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
+use App\Mail\GuestCredentialsMail;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends BaseController
 {
     // register function
     public function register(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'name' => 'required',
-        'email' => 'required|email|unique:users',
-        'password' => 'required',
-        'c_password' => 'required|same:password',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8',
+            'role' => 'required|exists:roles,name',
+        ]);
 
-    if ($validator->fails()) {
-        return $this->sendError('Validation Error.', $validator->errors());
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $input = $request->all();
+        $input['password'] = bcrypt($input['password']);
+        $user = User::create($input);
+
+        // Assign role
+        $user->roles()->attach(Role::where('name', $request->role)->first());
+
+        // Trigger guest email
+        if ($request->role === 'guest') {
+            $this->sendGuestCredentials($user, $request->password);
+        }
+
+        return response()->json(['success' => 'User registered successfully']);
     }
-
-    $input = $request->all();
-    $input['password'] = bcrypt($input['password']);
-    $user = User::create($input);
-
-    // Assign default role (e.g., 'Guest') to the user
-    $defaultRole = Role::where('name', 'Guest')->first();
-    if ($defaultRole) {
-        $user->roles()->attach($defaultRole->id);
-    }
-
-    $success['user'] = $user;
-
-    return $this->sendResponse($success, 'User Registered Successfully.');
-}
 
 //    login function
    public function login() {
@@ -183,7 +185,7 @@ public function deleteAccount()
     return $this->sendResponse([], 'Account deleted successfully.');
 }
 
-
+// respond with user token
    protected function respondWithToken($token) {
     return [
         'access_token' => $token,
@@ -191,4 +193,16 @@ public function deleteAccount()
         'expires_in' => auth()->factory()->getTTL() * 60,
     ];
    }
+
+// send email to the client
+private function sendGuestCredentials(User $user, $password)
+{
+    // $details = [
+    //     'name' => $user->name,
+    //     'email' => $user->email,
+    //     'password' => $password,
+    // ];
+    Mail::to($user->email)->send(new GuestCredentialsMail($user, $password));
+}
+
 }
