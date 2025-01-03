@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CaseManagerController;
+use App\Http\Controllers\CaseProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 
 Route::group([
@@ -31,6 +33,10 @@ Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::post('/admin/assign-case-manager/{caseId}', [CaseManagerController::class, 'assignCaseManager']);
 });
 
+Route::prefix('cases/{caseId}')->group(function () {
+    Route::post('/profile', [CaseProfileController::class, 'store']); // Add/Update case profile
+    Route::get('/profile', [CaseProfileController::class, 'show']);  // Retrieve case profile
+});
 
 Route::post('password/forgot', [AuthController::class, 'forgotPassword']);
 Route::post('password/reset', [AuthController::class, 'resetPassword']);
