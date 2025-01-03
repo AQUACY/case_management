@@ -22,6 +22,7 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'subscribed_to_announcements',
     ];
 
     /**
@@ -70,6 +71,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Cases::class, 'case_manager_id');
     }
+    protected $casts = [
+        'subscribed_to_announcements' => 'boolean',
+    ];
 
 }
 
