@@ -18,10 +18,17 @@ class CreateCasesTable extends Migration
             $table->text('description')->nullable();
             $table->timestamps();
         });
+
+        Schema::table('cases', function (Blueprint $table) {
+            $table->string('contract_file')->nullable()->after('description'); // Path to the contract file
+        });
     }
 
     public function down(): void
     {
         Schema::dropIfExists('cases');
+        Schema::table('cases', function (Blueprint $table) {
+            $table->dropColumn('contract_file');
+        });
     }
 }

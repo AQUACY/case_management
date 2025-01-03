@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use App\Models\Cases;
 use App\Models\User;
 use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\Storage;
+use Exception;
 class CaseManagerController extends Controller
 {
     // view all cases
@@ -55,10 +57,10 @@ public function show($id)
         $request->validate([
             'bill' => 'required|numeric',
             'case_manager_id' => 'required|exists:users,id',
-            'user_id' => 'required|exists:users,id',  // Validate the user for whom the case is being created
+            'user_id' => 'required|exists:users,id',
             'description' => 'required|string',
+            'contract_file' => 'nullable|file|mimes:pdf|max:2048',
         ]);
-
         // Generate unique order number
         $orderNumber = 'CASE-' . strtoupper(Str::random(8));
 
@@ -69,13 +71,64 @@ public function show($id)
             'case_manager_id' => $request->case_manager_id,
             'user_id' => $request->user_id,  // Assign the user to the case
             'description' => $request->description,
+            'contract_file' => $contractFilePath ?? null,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Case created successfully',
-            'data' => $case,
+            'data' => [
+                    'case' => $case,
+                    'contract_file_url' => asset('storage/' . $case->contract_file),
+                ],
         ], 201);
+    }
+
+
+    // upload contract file for the case
+    public function uploadContractFile(Request $request, $id)
+    {
+        try{
+        // Validate the file input
+        $request->validate([
+            'contract_file' => 'required|file|mimes:pdf|max:2048', // Only PDF, max size 2 MB
+        ]);
+
+        // Find the case by ID
+        $case = Cases::findOrFail($id);
+
+        // Define the case-specific folder
+        $caseFolder = "contracts/case_{$case->id}";
+
+        // Create a folder for the case if it doesn't exist
+        if (!Storage::disk('local')->exists($caseFolder)) {
+            Storage::disk('local')->makeDirectory($caseFolder);
+        }
+
+        // Store the contract file in the case's folder
+        $fileName = $request->file('contract_file')->getClientOriginalName();
+        $filePath = $request->file('contract_file')->storeAs($caseFolder, $fileName, 'local');
+
+        // Update the case record with the file path
+        $case->update([
+            'contract_file' => $filePath,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contract file uploaded successfully.',
+            'file_path' => $filePath,
+        ], 201);}
+        catch (Exception $e) {
+            // Log the error to the Laravel log file
+            Log::error('Slide upload error: ' . $e->getMessage());
+
+            // Return an error response to the client
+            return response()->json([
+                'message' => 'An error occurred while uploading the slide.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 

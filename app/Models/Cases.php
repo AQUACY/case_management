@@ -12,8 +12,9 @@ class Cases extends Model
         'order_number',
         'bill',
         'case_manager_id',
-        'user_id',  // Add this field to the fillable array
+        'user_id',
         'description',
+        'contract_file',
     ];
 
     // Relationship with Case Manager (User)
