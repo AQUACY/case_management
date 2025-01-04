@@ -15,6 +15,7 @@ class Cases extends Model
         'user_id',
         'description',
         'contract_file',
+        'status',
     ];
 
     // Relationship with Case Manager (User)

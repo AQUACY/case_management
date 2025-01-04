@@ -60,4 +60,35 @@ class AnnouncementController extends Controller
                         : 'Successfully unsubscribed from announcements.',
         ], 200);
     }
+
+     // Update an existing announcement
+     public function update(Request $request, $id)
+     {
+         $request->validate([
+             'title' => 'required|string|max:255',
+             'content' => 'required|string',
+         ]);
+
+         $announcement = Announcement::findOrFail($id);
+         $announcement->update([
+             'title' => $request->title,
+             'content' => $request->content,
+         ]);
+
+         return response()->json([
+             'message' => 'Announcement updated successfully.',
+             'announcement' => $announcement,
+         ], 200);
+     }
+
+     // Delete an announcement
+     public function destroy($id)
+     {
+         $announcement = Announcement::findOrFail($id);
+         $announcement->delete();
+
+         return response()->json([
+             'message' => 'Announcement deleted successfully.',
+         ], 200);
+     }
 }

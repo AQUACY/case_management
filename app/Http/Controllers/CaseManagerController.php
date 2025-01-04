@@ -131,6 +131,66 @@ public function show($id)
         }
     }
 
+    // update case
+    public function update(Request $request, $id)
+{
+    // Validate request data
+    $request->validate([
+        'bill' => 'nullable|numeric',
+        'case_manager_id' => 'nullable|exists:users,id',
+        'description' => 'nullable|string',
+        'contract_file' => 'nullable|file|mimes:pdf|max:2048',
+    ]);
+
+    // Find the case
+    $case = Cases::findOrFail($id);
+
+    // Update case fields
+    $case->bill = $request->bill ?? $case->bill;
+    $case->case_manager_id = $request->case_manager_id ?? $case->case_manager_id;
+    $case->description = $request->description ?? $case->description;
+
+    // Handle file upload if provided
+    if ($request->hasFile('contract_file')) {
+        // Delete the old file if it exists
+        if ($case->contract_file && Storage::exists($case->contract_file)) {
+            Storage::delete($case->contract_file);
+        }
+
+        // Store the new file
+        $contractFilePath = $request->file('contract_file')->store('contracts', 'public');
+        $case->contract_file = $contractFilePath;
+    }
+
+    // Save the updated case
+    $case->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Case updated successfully',
+        'data' => [
+            'case' => $case,
+            'contract_file_url' => $case->contract_file ? asset('storage/' . $case->contract_file) : null,
+        ],
+    ], 200);
+}
+
+// archive cases
+public function archive($id)
+{
+    // Find the case
+    $case = Cases::findOrFail($id);
+
+    // Update the status to 'archived'
+    $case->status = 'archived';
+    $case->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Case archived successfully',
+        'data' => $case,
+    ], 200);
+}
 
     // // Assign the case to a case manager
     // public function assignCaseManager(Request $request, $caseId)

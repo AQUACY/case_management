@@ -6,6 +6,7 @@ use App\Http\Controllers\CaseProfileController;
 use App\Http\Controllers\RecommenderController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\MessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +17,6 @@ Route::group([
     'prefix' => 'auth',
 
 ], function($router){
-
     // Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::put('account/update', [AuthController::class, 'updateAccount']);
@@ -27,18 +27,29 @@ Route::group([
     Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:api');
     Route::get('/announcements', [AnnouncementController::class, 'index']); // Available to all users
     Route::patch('/user/{id}/subscribe', [AnnouncementController::class, 'updateSubscription'])->middleware('auth:api');
+    Route::post('/addmessages', [MessageController::class, 'store']); // Create a new message
+    Route::post('/messages/{id}/respond', [MessageController::class, 'respondToMessage']); // Respond to a message
+    Route::patch('/messages/{id}/rate', [MessageController::class, 'rateResponse']); // Rate a response
+
 });
 
 // admin middle ware
 Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::post('/admin/register', [AuthController::class, 'register']);
     Route::post('/admin/createcase', [CaseManagerController::class, 'store']);
+    Route::patch('/admin/updatecase/{id}', [CaseManagerController::class, 'update']);
+    Route::patch('/admin/archivecase/{id}', [CaseManagerController::class, 'archive']);
     Route::get('/admin/viewallcase', [CaseManagerController::class, 'index']);
     Route::get('/admin/viewcase/{caseId}', [CaseManagerController::class, 'show']);
     Route::post('/admin/update/{caseId}/contractfile', [CaseManagerController::class, 'uploadContractFile']);
     Route::post('/admin/assign-case-manager/{caseId}', [CaseManagerController::class, 'assignCaseManager']);
     Route::post('/admin/document-categories/add', [DocumentController::class, 'addCategory']);
     Route::post('/admin/announcements', [AnnouncementController::class, 'create']); // Admin-only
+    Route::patch('/admin/announcements/{id}', [AnnouncementController::class, 'update']);
+    Route::delete('/admin/announcements/{id}', [AnnouncementController::class, 'destroy']);
+    Route::post('/admin/addmessagecategory', [MessageController::class, 'createMessageCategory']);
+    Route::delete('/admin/deletemessagecategory/{id}', [MessageController::class, 'deleteMessageCategory']);
+
 });
 
 // case middle
