@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-namespace App\Http\Controllers;
-
 use App\Mail\MessageNotificationMail;
 use App\Mail\MessageResponseMail;
 use App\Models\Message;
@@ -164,5 +162,61 @@ class MessageController extends Controller
             'message' => 'Rating submitted successfully.',
         ], 200);
     }
+
+// case manager sending message to user(client)
+    public function sendMessageToUser(Request $request)
+{
+    $request->validate([
+        'user_id' => 'required|exists:users,id',
+        'category_id' => 'required|exists:message_categories,id',
+        'subject' => 'required|string|max:255',
+        'message' => 'required|string',
+    ]);
+
+    $message = Message::create([
+        'user_id' => $request->user_id,
+        'category_id' => $request->category_id,
+        'subject' => $request->subject,
+        'message' => $request->message,
+        'status' => 'pending',
+        'sender_type' => 'Case Manager',
+        'case_manager_id' => auth()->id(),
+    ]);
+
+    // Notify the user
+    $platformUrl = config('app.url'); // Ensure 'app.url' is set in .env
+    Mail::to($message->user->email)->send(new MessageNotificationMail($message, $platformUrl));
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Message sent to user successfully.',
+        'data' => $message,
+    ], 201);
+}
+
+// user responding to case manager message
+public function respondToCaseMessage(Request $request, $messageId)
+{
+    $request->validate([
+        'response' => 'required|string',
+    ]);
+
+    $message = Message::findOrFail($messageId);
+    $message->response = $request->response;
+    $message->status = 'answered';
+    $message->save();
+
+
+    // Notify the case manager
+    $platformUrl = config('app.url'); // Ensure 'app.url' is set in .env
+    Mail::to($message->caseManager->email)->send(new MessageResponseMail($message, $platformUrl));
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Response sent successfully.',
+        'data' => $message,
+    ]);
+}
+
 
 }

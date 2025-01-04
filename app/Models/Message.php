@@ -18,6 +18,7 @@ class Message extends Model
         'response',
         'status',
         'rating',
+        'sender_type', // 'user' or 'case_manager'
     ];
 
     public function category()

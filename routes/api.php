@@ -28,6 +28,8 @@ Route::group([
     Route::get('/announcements', [AnnouncementController::class, 'index']); // Available to all users
     Route::patch('/user/{id}/subscribe', [AnnouncementController::class, 'updateSubscription'])->middleware('auth:api');
     Route::post('/addmessages', [MessageController::class, 'store']); // Create a new message
+    Route::post('/caseaddmessages', [MessageController::class, 'sendMessageToUser']); // Create a new message
+    Route::post('/caserespondmessages/{id}/respond', [MessageController::class, 'respondToCaseMessage']); // Respond to case manager case
     Route::post('/messages/{id}/respond', [MessageController::class, 'respondToMessage']); // Respond to a message
     Route::patch('/messages/{id}/rate', [MessageController::class, 'rateResponse']); // Rate a response
 

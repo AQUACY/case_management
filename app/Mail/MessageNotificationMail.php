@@ -30,7 +30,9 @@ class MessageNotificationMail extends Mailable
      */
     public function build()
     {
-        $subject = "{$this->messageData->category->name} - New Message Received from {$this->messageData->user->name}";
+        $subject = ($this->messageData->sender_type === 'Case Manager')
+            ? "New Message from Case Manager"
+            : "New Message from User";
 
         return $this->subject($subject)
                     ->view('emails.message_notification');
