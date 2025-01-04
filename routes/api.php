@@ -9,6 +9,8 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\MessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CaseQuestionnaireController;
+
 
 
 
@@ -32,6 +34,8 @@ Route::group([
     Route::post('/caserespondmessages/{id}/respond', [MessageController::class, 'respondToCaseMessage']); // Respond to case manager case
     Route::post('/messages/{id}/respond', [MessageController::class, 'respondToMessage']); // Respond to a message
     Route::patch('/messages/{id}/rate', [MessageController::class, 'rateResponse']); // Rate a response
+    Route::post('/cases/{caseId}/questionnaire', [CaseQuestionnaireController::class, 'store']);
+
 
 });
 
