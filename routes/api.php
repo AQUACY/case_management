@@ -10,6 +10,7 @@ use App\Http\Controllers\MessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CaseQuestionnaireController;
+use App\Http\Controllers\PublicationRecordController;
 
 
 
@@ -36,8 +37,8 @@ Route::group([
     Route::patch('/messages/{id}/rate', [MessageController::class, 'rateResponse']); // Rate a response
     Route::post('/cases/{caseId}/questionnaire', [CaseQuestionnaireController::class, 'store']);
     Route::post('/questionnaires/{id}/request-review', [CaseQuestionnaireController::class, 'requestReview']);
-
-
+    Route::post('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'updateOrCreate']);
+    Route::get('cases/{caseId}/publication-records', [PublicationRecordController::class, 'getPublicationRecord']);
 
 });
 
@@ -57,7 +58,7 @@ Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::delete('/admin/announcements/{id}', [AnnouncementController::class, 'destroy']);
     Route::post('/admin/addmessagecategory', [MessageController::class, 'createMessageCategory']);
     Route::delete('/admin/deletemessagecategory/{id}', [MessageController::class, 'deleteMessageCategory']);
-
+    Route::delete('/admin/cases/{caseId}/publication-records', [PublicationRecordController::class, 'destroyAll']);
 });
 
 // case middle

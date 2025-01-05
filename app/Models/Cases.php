@@ -29,5 +29,9 @@ class Cases extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    public function publicationRecord()
+    {
+        return $this->hasOne(PublicationRecord::class, 'case_id');
+    }
 }
 
