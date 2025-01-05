@@ -35,6 +35,8 @@ Route::group([
     Route::post('/messages/{id}/respond', [MessageController::class, 'respondToMessage']); // Respond to a message
     Route::patch('/messages/{id}/rate', [MessageController::class, 'rateResponse']); // Rate a response
     Route::post('/cases/{caseId}/questionnaire', [CaseQuestionnaireController::class, 'store']);
+    Route::post('/questionnaires/{id}/request-review', [CaseQuestionnaireController::class, 'requestReview']);
+
 
 
 });

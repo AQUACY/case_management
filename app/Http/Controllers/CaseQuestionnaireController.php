@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\CaseQuestionnaire;
 use App\Models\Cases;
 use Illuminate\Http\Request;
-use Log;
+use App\Mail\ReviewRequestMail;
+use Illuminate\Support\Facades\Mail;
+
+
 
 class CaseQuestionnaireController extends Controller
 {
@@ -136,4 +139,28 @@ class CaseQuestionnaireController extends Controller
         $caseQuestionnaire = CaseQuestionnaire::with('case')->findOrFail($id);
         return response()->json($caseQuestionnaire);
     }
+
+    // request review function
+    public function requestReview($id)
+    {
+        $caseQuestionnaire = CaseQuestionnaire::with('case.caseManager')->findOrFail($id);
+
+        if (!$caseQuestionnaire->case || !$caseQuestionnaire->case->caseManager) {
+            return response()->json([
+                'message' => 'Case or Case Manager not found.'
+            ], 404);
+        }
+
+        $caseQuestionnaire->status = 'review_requested';
+        $caseQuestionnaire->save();
+
+        $caseManagerEmail = $caseQuestionnaire->case->caseManager->email;
+
+        Mail::to($caseManagerEmail)->send(new ReviewRequestMail($caseQuestionnaire));
+
+        return response()->json([
+            'message' => 'Review request has been sent to the case manager.'
+        ], 200);
+    }
+
 }

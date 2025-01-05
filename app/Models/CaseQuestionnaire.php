@@ -88,4 +88,14 @@ class CaseQuestionnaire extends Model
     {
         return $this->hasMany(FamilyMember::class);
     }
-}
+        public function case()
+    {
+        return $this->belongsTo(Cases::class);
+    }
+
+    // Case model
+    public function caseManager()
+    {
+        return $this->belongsTo(User::class, 'case_manager_id');
+    }
+    }
