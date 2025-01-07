@@ -46,7 +46,6 @@ Route::group([
     Route::post('/request-review/{caseId}/request-review', [ProposedEmploymentEndavor::class, 'requestReview']);
     Route::get('/client-records/{caseId}', [ClientRecordController::class, 'index']);
     Route::post('/client-records/{caseId}/add', [ClientRecordController::class, 'store']);
-    Route::delete('/client-records/{id}', [ClientRecordController::class, 'destroy']);
 });
 
 // admin middle ware
@@ -67,6 +66,7 @@ Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::delete('/admin/deletemessagecategory/{id}', [MessageController::class, 'deleteMessageCategory']);
     Route::delete('/admin/cases/{caseId}/publication-records', [PublicationRecordController::class, 'destroyAll']);
     Route::delete('/admin/cases/{caseId}/deleteendavorrecords', [ProposedEmploymentEndavor::class, 'delete']);
+    Route::delete('/admin/client-records/{caseId}', [ClientRecordController::class, 'deleteClientRecord']);
 });
 
 // case middle

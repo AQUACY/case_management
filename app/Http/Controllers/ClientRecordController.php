@@ -138,4 +138,36 @@ class ClientRecordController extends Controller
     }
 }
 
+public function index($id)
+{
+    $caseClientRecords = ClientRecord::with('case', 'dependents')->findOrFail($id);
+    return response()->json($caseClientRecords);
+}
+
+public function deleteDependent($clientRecordId)
+{
+    try{
+        $dependents = Dependent::where('client_record_id', $clientRecordId)->firstOrFail();
+        $dependents->delete();
+        return response()->json(['message' => 'Dependent deleted successfully.'], 200);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    }
+
+}
+
+public function deleteClientRecord($caseId)
+{
+    try{
+        $clientRecord = ClientRecord::where('case_id', $caseId)->firstOrFail();
+        $clientRecord->delete();
+        return response()->json(['message' => 'Client Record deleted successfully.'], 200);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    }
+
+}
+
 }
