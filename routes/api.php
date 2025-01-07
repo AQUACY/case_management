@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CaseQuestionnaireController;
 use App\Http\Controllers\PublicationRecordController;
+use App\Http\Controllers\ProposedEmploymentEndavor;
 
 
 
@@ -38,8 +39,9 @@ Route::group([
     Route::post('/cases/{caseId}/questionnaire', [CaseQuestionnaireController::class, 'store']);
     Route::post('/questionnaires/{id}/request-review', [CaseQuestionnaireController::class, 'requestReview']);
     Route::post('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'updateOrCreate']);
-    Route::get('cases/{caseId}/publication-records', [PublicationRecordController::class, 'getPublicationRecord']);
-
+    Route::get('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'getPublicationRecord']);
+    Route::post('/cases/{caseId}/addendavorrecords', [ProposedEmploymentEndavor::class, 'storeOrUpdate']);
+    Route::get('/cases/{caseId}/getendavorrecords', [ProposedEmploymentEndavor::class, 'get']);
 });
 
 // admin middle ware
@@ -59,6 +61,7 @@ Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::post('/admin/addmessagecategory', [MessageController::class, 'createMessageCategory']);
     Route::delete('/admin/deletemessagecategory/{id}', [MessageController::class, 'deleteMessageCategory']);
     Route::delete('/admin/cases/{caseId}/publication-records', [PublicationRecordController::class, 'destroyAll']);
+    Route::delete('/admin/cases/{caseId}/deleteendavorrecords', [ProposedEmploymentEndavor::class, 'delete']);
 });
 
 // case middle
