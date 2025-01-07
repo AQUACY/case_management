@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CaseQuestionnaireController;
 use App\Http\Controllers\PublicationRecordController;
 use App\Http\Controllers\ProposedEmploymentEndavor;
+use App\Http\Controllers\ClientRecordController;
 
 
 
@@ -43,6 +44,9 @@ Route::group([
     Route::post('/cases/{caseId}/addendavorrecords', [ProposedEmploymentEndavor::class, 'storeOrUpdate']);
     Route::get('/cases/{caseId}/getendavorrecords', [ProposedEmploymentEndavor::class, 'get']);
     Route::post('/request-review/{caseId}/request-review', [ProposedEmploymentEndavor::class, 'requestReview']);
+    Route::get('/client-records/{caseId}', [ClientRecordController::class, 'index']);
+    Route::post('/client-records/{caseId}/add', [ClientRecordController::class, 'store']);
+    Route::delete('/client-records/{id}', [ClientRecordController::class, 'destroy']);
 });
 
 // admin middle ware
