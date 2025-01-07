@@ -85,4 +85,14 @@ class ProposedEmploymentEndavorRecord extends Model
     protected $casts = [
         'type' => 'array', // Cast 'type' as an array
     ];
+
+    public function case()
+    {
+        return $this->belongsTo(Cases::class, 'case_id');
+    }
+
+    public function caseManager()
+    {
+        return $this->belongsTo(User::class, 'case_manager_id');
+    }
 }

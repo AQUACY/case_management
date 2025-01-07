@@ -33,5 +33,6 @@ class Cases extends Model
     {
         return $this->hasOne(PublicationRecord::class, 'case_id');
     }
+
 }
 

@@ -42,6 +42,7 @@ Route::group([
     Route::get('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'getPublicationRecord']);
     Route::post('/cases/{caseId}/addendavorrecords', [ProposedEmploymentEndavor::class, 'storeOrUpdate']);
     Route::get('/cases/{caseId}/getendavorrecords', [ProposedEmploymentEndavor::class, 'get']);
+    Route::post('/request-review/{caseId}/request-review', [ProposedEmploymentEndavor::class, 'requestReview']);
 });
 
 // admin middle ware

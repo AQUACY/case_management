@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ProposedEmploymentEndavorRecord;
+use Illuminate\Support\Facades\Mail;
+use App\Notifications\ReviewRequestNotification;
+use App\Models\Cases;
+use App\Mail\ReviewRequestMailEndavor;
+
+
 // use Log;
 use Exception;
 
@@ -138,5 +144,43 @@ class ProposedEmploymentEndavor extends Controller
         return response()->json(['message' => 'Record deleted successfully'], 200);
     }
 
+    // send mail and request review
+    public function requestReview($caseId)
+{
+    try{
+        $record = ProposedEmploymentEndavorRecord::where('case_id', $caseId)->first();
+
+        if (!$record) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+
+        // Retrieve the case by ID
+        $case = Cases::find($caseId);
+
+        if (!$case) {
+            return response()->json(['message' => 'Case not found'], 404);
+        }
+
+        // Access the case manager's email through the relationship
+        $caseManager = $case->caseManager;
+
+        if (!$caseManager) {
+            return response()->json(['message' => 'Case Manager not found'], 404);
+        }
+
+        // // Trigger Email
+        // Mail::to($caseManager->email)->send(new ReviewRequestMailEndavor($record));
+
+        // Trigger Notification
+        $caseManager->notify(new ReviewRequestNotification($record));
+
+        return response()->json(['message' => 'Review request sent successfully']);
+}catch (Exception $e) {
+    // Log the error for debugging
+    // Log::error('Error saving record: ' . $e->getMessage());
+
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
+}
 
 }
