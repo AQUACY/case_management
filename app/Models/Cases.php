@@ -33,6 +33,10 @@ class Cases extends Model
     {
         return $this->hasOne(PublicationRecord::class, 'case_id');
     }
+    public function messages()
+    {
+        return $this->hasMany(Message::class);  // Define the one-to-many relationship
+    }
 
 }
 

@@ -32,7 +32,7 @@ Route::group([
     Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:api');
     Route::get('/announcements', [AnnouncementController::class, 'index']); // Available to all users
     Route::patch('/user/{id}/subscribe', [AnnouncementController::class, 'updateSubscription'])->middleware('auth:api');
-    Route::post('/addmessages', [MessageController::class, 'store']); // Create a new message
+    Route::post('cases/{caseId}/addmessages', [MessageController::class, 'store']); // Create a new message
     Route::post('/caseaddmessages', [MessageController::class, 'sendMessageToUser']); // Create a new message
     Route::post('/caserespondmessages/{id}/respond', [MessageController::class, 'respondToCaseMessage']); // Respond to case manager case
     Route::post('/messages/{id}/respond', [MessageController::class, 'respondToMessage']); // Respond to a message
@@ -60,7 +60,7 @@ Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::get('/admin/viewcase/{caseId}', [CaseManagerController::class, 'show']);
     Route::post('/admin/update/{caseId}/contractfile', [CaseManagerController::class, 'uploadContractFile']);
     Route::post('/admin/assign-case-manager/{caseId}', [CaseManagerController::class, 'assignCaseManager']);
-    Route::post('/admin/document-categories/add', [DocumentController::class, 'addCategory']);
+    Route::post('/admin/document-categories/add', [MessageController::class, 'createMessageCategory']);
     Route::post('/admin/announcements', [AnnouncementController::class, 'create']); // Admin-only
     Route::patch('/admin/announcements/{id}', [AnnouncementController::class, 'update']);
     Route::delete('/admin/announcements/{id}', [AnnouncementController::class, 'destroy']);
@@ -81,6 +81,9 @@ Route::prefix('cases/{caseId}')->group(function () {
     Route::post('/recommenders/bulk', [RecommenderController::class, 'addBulkRecommenders']);
     Route::post('/documents/upload', [DocumentController::class, 'upload']);
     Route::get('/documents', [DocumentController::class, 'viewDocuments']);
+    Route::delete('/documents/{documentId}', [DocumentController::class, 'deleteDocument']);
+    Route::get('/documents/{documentId}/download', [DocumentController::class, 'downloadDocument']);
+    Route::get('/messages', [MessageController::class, 'getMessagesForCase']);
 });
 
 Route::post('password/forgot', [AuthController::class, 'forgotPassword']);

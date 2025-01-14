@@ -7,6 +7,7 @@ use App\Mail\MessageResponseMail;
 use App\Models\Message;
 use App\Models\MessageCategory;
 use App\Models\User;
+use App\Models\Cases;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Exception;
@@ -16,6 +17,7 @@ class MessageController extends Controller
 {
     public function createMessageCategory(Request $request)
     {
+        try{
         $request->validate(['name' => 'required|string|max:255']);
 
         $category = MessageCategory::create(['name' => $request->name]);
@@ -25,14 +27,23 @@ class MessageController extends Controller
             'message' => 'Category created successfully.',
             'data' => $category,
         ], 201);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    }
     }
 
     public function deleteMessageCategory($id)
     {
+        try{
         $category = MessageCategory::findOrFail($id);
         $category->delete();
 
         return response()->json(['message' => 'Category deleted successfully.'], 200);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 
      /**
@@ -41,51 +52,59 @@ class MessageController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request, $caseId)
+{
+    try{
+    // Validate request data
+    $request->validate([
+        'category_id' => 'required|exists:message_categories,id',
+        'subject' => 'required|string|max:255',
+        'message' => 'required|string',
+        'case_id' => 'required|exists:cases,id'
+    ]);
 
-        // Validate request data
-        $request->validate([
-            'category_id' => 'required|exists:message_categories,id',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
-        ]);
-        // Create the message
-        $message = Message::create([
-            'user_id' => $request->user()->id,
-            'category_id' => $request->category_id,
-            'subject' => $request->subject,
-            'message' => $request->message,
-            'status' => 'pending',
-        ]);
+    // Ensure that the case exists by case_id
+    $case = Cases::findOrFail($caseId);
 
-        // Assign a case manager (Logic to assign case manager can vary)
-        // For simplicity, let's assign the first available case manager
-        $caseManager = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Case Manager');
-        })->first();
+    // Create the message
+    $message = Message::create([
+        'user_id' => $request->user()->id,
+        'case_id' => $caseId,  // Associate the message with the case
+        'category_id' => $request->category_id,
+        'subject' => $request->subject,
+        'message' => $request->message,
+        'status' => 'pending',
+    ]);
 
-        if (!$caseManager) {
-            throw new Exception('No case manager found');
-        }
+    // Assign a case manager (Logic to assign case manager can vary)
+    $caseManager = User::whereHas('roles', function ($query) {
+        $query->where('name', 'Case Manager');
+    })->first();
 
-        if ($caseManager) {
-            $message->case_manager_id = $caseManager->id;
-            $message->save();
-
-            // Send email notification to the case manager
-            $platformUrl = config('app.url'); // Ensure 'app.url' is set in .env
-
-            Mail::to($caseManager->email)->send(new MessageNotificationMail($message, $platformUrl));
-        }
-
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Message sent successfully and case manager notified.',
-            'data' => $message,
-        ], 201);
+    if (!$caseManager) {
+        throw new Exception('No case manager found');
     }
+
+    if ($caseManager) {
+        $message->case_manager_id = $caseManager->id;
+        $message->save();
+
+        // Send email notification to the case manager
+        $platformUrl = config('app.url'); // Ensure 'app.url' is set in .env
+
+        Mail::to($caseManager->email)->send(new MessageNotificationMail($message, $platformUrl));
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Message sent successfully and case manager notified.',
+        'data' => $message,
+    ], 201);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
+}
 
     /**
      * Respond to an existing message.
@@ -96,6 +115,7 @@ class MessageController extends Controller
      */
     public function respondToMessage(Request $request, $messageId)
     {
+        try {
         // Validate the response
         $request->validate([
             'response' => 'required|string',
@@ -126,6 +146,10 @@ class MessageController extends Controller
             'message' => 'Response saved successfully and user notified.',
             'data' => $message,
         ], 200);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 
     /**
@@ -166,6 +190,7 @@ class MessageController extends Controller
 // case manager sending message to user(client)
     public function sendMessageToUser(Request $request)
 {
+    try {
     $request->validate([
         'user_id' => 'required|exists:users,id',
         'category_id' => 'required|exists:message_categories,id',
@@ -192,11 +217,16 @@ class MessageController extends Controller
         'message' => 'Message sent to user successfully.',
         'data' => $message,
     ], 201);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
 }
 
 // user responding to case manager message
 public function respondToCaseMessage(Request $request, $messageId)
 {
+    try{
     $request->validate([
         'response' => 'required|string',
     ]);
@@ -216,6 +246,30 @@ public function respondToCaseMessage(Request $request, $messageId)
         'message' => 'Response sent successfully.',
         'data' => $message,
     ]);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
+}
+
+public function getMessagesForCase($caseId)
+{
+    try {
+        // Ensure that the case exists
+        $case = Cases::findOrFail($caseId);
+
+        // Fetch all messages associated with the given case
+        $messages = $case->messages()->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Messages retrieved successfully.',
+            'data' => $messages,
+        ], 200);
+    } catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error fetching messages', 'error' => $e->getMessage()], 500);
+    }
 }
 
 

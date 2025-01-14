@@ -35,4 +35,9 @@ class Message extends Model
     {
         return $this->belongsTo(User::class, 'case_manager_id');
     }
+    public function case()
+{
+    return $this->belongsTo(Cases::class);
+}
+
 }

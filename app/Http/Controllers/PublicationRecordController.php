@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\PublicationRecord;
 use Illuminate\Http\Request;
 use App\Models\Cases;
+use Log;
+use Exception;
 
 class PublicationRecordController extends Controller
 {
     public function updateOrCreate(Request $request, $caseId)
     {
+        try{
         $validatedData = $request->validate([
             'peer_reviewed_journal_articles' => 'nullable|integer|min:0',
             'notes_peer_reviewed_journal' => 'nullable|string',
@@ -43,11 +46,16 @@ class PublicationRecordController extends Controller
             'message' => 'Publication record updated successfully',
             'data' => $publicationRecord
         ]);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 
     // delete the records
     public function destroyAll($caseId)
 {
+    try{
     $case = Cases::findOrFail($caseId);
 
     $case->publicationRecord()->delete();
@@ -55,11 +63,16 @@ class PublicationRecordController extends Controller
     return response()->json([
         'message' => 'All publication records have been deleted successfully.'
     ], 200);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
 }
 
 // get publication records
 public function getPublicationRecord($caseId)
 {
+    try{
     // Find the case by ID
     $case = Cases::findOrFail($caseId);
 
@@ -71,5 +84,9 @@ public function getPublicationRecord($caseId)
         'message' => 'Publication record fetched successfully',
         'data' => $publicationRecord
     ]);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
 }
 }
