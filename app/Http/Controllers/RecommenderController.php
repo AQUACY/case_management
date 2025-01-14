@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Recommender;
 use Illuminate\Http\Request;
 use App\Models\Cases;
+use Log;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
 
 class RecommenderController extends Controller
 {
@@ -12,6 +16,7 @@ class RecommenderController extends Controller
     // add recommenders in bulk
     public function addBulkRecommenders(Request $request, $caseId)
 {
+    try{
     // Validate the input
     $request->validate([
         'recommenders' => 'required|array',
@@ -63,11 +68,16 @@ class RecommenderController extends Controller
         'message' => 'Recommenders added successfully.',
         'data' => $recommenders,
     ], 201);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
 }
 
     // Store a new recommender for a case
     public function store(Request $request, $caseId)
     {
+        try{
         // Validate request data
         $request->validate([
             'name' => 'required|string|max:255',
@@ -106,13 +116,23 @@ class RecommenderController extends Controller
             'message' => 'Recommender added successfully',
             'data' => $recommender,
         ], 201);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 
     // Update recommender details
-    public function update(Request $request, $id)
-    {
-        // Find the recommender
-        $recommender = Recommender::findOrFail($id);
+    public function update(Request $request, $case_id, $recommender_id)
+{
+    try {
+        // Ensure the case exists
+        $case = Cases::findOrFail($case_id);
+
+        // Find the recommender and ensure it belongs to the specified case
+        $recommender = Recommender::where('id', $recommender_id)
+            ->where('case_id', $case_id)
+            ->firstOrFail();
 
         // Validate request data
         $request->validate([
@@ -138,16 +158,34 @@ class RecommenderController extends Controller
             'message' => 'Recommender updated successfully',
             'data' => $recommender,
         ]);
+
+    } catch (ModelNotFoundException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Recommender or Case not found',
+        ], 404);
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error saving record',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 
     // List recommenders for a case
     public function index($caseId)
     {
+        try{
         $recommenders = Recommender::where('case_id', $caseId)->get();
 
         return response()->json([
             'success' => true,
             'data' => $recommenders,
         ]);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 }

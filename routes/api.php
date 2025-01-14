@@ -46,6 +46,8 @@ Route::group([
     Route::post('/request-review/{caseId}/request-review', [ProposedEmploymentEndavor::class, 'requestReview']);
     Route::get('/client-records/{caseId}', [ClientRecordController::class, 'index']);
     Route::post('/client-records/{caseId}/add', [ClientRecordController::class, 'store']);
+    Route::get('/cases/mycase/{userId}', [CaseManagerController::class, 'showByUserId']);
+
 });
 
 // admin middle ware
@@ -75,7 +77,7 @@ Route::prefix('cases/{caseId}')->group(function () {
     Route::get('/profile', [CaseProfileController::class, 'show']);  // Retrieve case profile
     Route::post('/recommenders', [RecommenderController::class, 'store']); // Add a new recommender
     Route::get('/recommenders', [RecommenderController::class, 'index']); // List recommenders for a case
-    Route::put('/recommenders/{id}', [RecommenderController::class, 'update']); // Update a recommender
+    Route::patch('/recommenders/{id}', [RecommenderController::class, 'update']); // Update a recommender
     Route::post('/recommenders/bulk', [RecommenderController::class, 'addBulkRecommenders']);
     Route::post('/documents/upload', [DocumentController::class, 'upload']);
     Route::get('/documents', [DocumentController::class, 'viewDocuments']);
@@ -83,7 +85,7 @@ Route::prefix('cases/{caseId}')->group(function () {
 
 Route::post('password/forgot', [AuthController::class, 'forgotPassword']);
 Route::post('password/reset', [AuthController::class, 'resetPassword']);
-
+Route::post('/register', [AuthController::class, 'register']);
 
 
 // Route::get('/user', function (Request $request) {

@@ -50,9 +50,31 @@ public function show($id)
     ], 200);
 }
 
+// view case by userID
+public function showByUserId($userId)
+{
+    // Fetch the case by user_id, including the case manager and user
+    $case = Cases::with('caseManager', 'user')->where('user_id', $userId)->first();
+
+    // Check if the case exists
+    if (!$case) {
+        return response()->json([
+            'error' => 'Case not found for the given user ID.'
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Case retrieved successfully.',
+        'data' => $case
+    ], 200);
+}
+
+
 // create and assign case
     public function store(Request $request)
     {
+        try{
         // Validate request data
         $request->validate([
             'bill' => 'required|numeric',
@@ -82,6 +104,10 @@ public function show($id)
                     'contract_file_url' => asset('storage/' . $case->contract_file),
                 ],
         ], 201);
+         }catch (Exception $e) {
+            // Log error and return response
+            return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    }
     }
 
 

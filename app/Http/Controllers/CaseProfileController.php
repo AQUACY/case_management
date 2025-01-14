@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\CaseProfile;
 use App\Models\Cases;
 use Illuminate\Http\Request;
+use Log;
+use Exception;
 
 class CaseProfileController extends Controller
 {
     // Store a new case profile
     public function store(Request $request, $caseId)
     {
+        try{
         // Validate input
         $request->validate([
             'academic_degree' => 'nullable|string',
@@ -54,11 +57,16 @@ class CaseProfileController extends Controller
             'message' => 'Case profile saved successfully.',
             'data' => $profile,
         ], 201);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 
     // Retrieve a case profile
     public function show($caseId)
     {
+        try{
         $profile = CaseProfile::where('case_id', $caseId)->first();
 
         if (!$profile) {
@@ -72,5 +80,9 @@ class CaseProfileController extends Controller
             'success' => true,
             'data' => $profile,
         ]);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 }

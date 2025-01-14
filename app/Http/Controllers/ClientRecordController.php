@@ -138,11 +138,14 @@ class ClientRecordController extends Controller
     }
 }
 
-public function index($id)
+public function index($caseId)
 {
-    $caseClientRecords = ClientRecord::with('case', 'dependents')->findOrFail($id);
+    // Retrieve the ClientRecord along with its related case and dependents using case_id
+    $caseClientRecords = ClientRecord::with('case', 'dependents')->where('case_id', $caseId)->firstOrFail();
+
     return response()->json($caseClientRecords);
 }
+
 
 public function deleteDependent($clientRecordId)
 {

@@ -7,12 +7,15 @@ use App\Models\Announcement;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Log;
+use Exception;
 
 class AnnouncementController extends Controller
 {
     // Post a new announcement
     public function create(Request $request)
     {
+        try{
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -36,6 +39,10 @@ class AnnouncementController extends Controller
             'message' => 'Announcement created successfully.',
             'announcement' => $announcement,
         ], 201);
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    }
     }
 
     // Get all announcements

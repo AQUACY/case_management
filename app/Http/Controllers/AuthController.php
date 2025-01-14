@@ -11,12 +11,15 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\GuestCredentialsMail;
 use Illuminate\Support\Facades\Mail;
+use Log;
+use Exception;
 
 class AuthController extends BaseController
 {
     // register function
     public function register(Request $request)
     {
+        try {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
@@ -41,11 +44,15 @@ class AuthController extends BaseController
         }
 
         return response()->json(['success' => 'User registered successfully']);
+    }catch (Exception $e) {
+            // Log error and return response
+            return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    }
     }
 
 //    login function
    public function login() {
-
+try{
     $credentials = request(['email', 'password']);
 
     if(! $token = auth()->attempt($credentials)){
@@ -55,48 +62,70 @@ class AuthController extends BaseController
     $success = $this->respondWithToken($token);
 
     return $this->sendResponse($success, 'User Login Successfully');
-
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    }
    }
 
 
     //    profile function
     public function profile() {
+        try{
         $success = auth()->user();
 
         return $this->sendResponse($success, 'Profile Fetched Successfully');
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 
 //    refresh function
     public function refresh() {
-        $success = $this->respondWithToken(auth()->refresh());
+        try{        $success = $this->respondWithToken(auth()->refresh());
 
         return $this->sendResponse($success, 'Token Fetched Successfully');
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
     }
 
 //    logout function
    public function logout() {
+    try{
     $success = auth()->logout();
     return $this->sendResponse($success, 'Logged out Successfully');
-   }
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
+}
 
 //    forgot password
 
 public function forgotPassword(Request $request)
 {
+    try{
     $request->validate(['email' => 'required|email']);
 
     $status = Password::sendResetLink(
         $request->only('email')
     );
-
     return $status === Password::RESET_LINK_SENT
         ? $this->sendResponse([], __($status))
         : $this->sendError('Error', __($status));
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
 }
+    }
 
 // reset password
 public function resetPassword(Request $request)
 {
+    try{
     $request->validate([
         'token' => 'required',
         'email' => 'required|email',
@@ -115,11 +144,16 @@ public function resetPassword(Request $request)
     return $status === Password::PASSWORD_RESET
         ? $this->sendResponse([], __($status))
         : $this->sendError('Error', __($status));
+    }catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
 }
+    }
 
 // update account
 public function updateAccount(Request $request)
 {
+    try{
     $user = auth()->user();
 
     $validated = $request->validate([
@@ -130,12 +164,17 @@ public function updateAccount(Request $request)
     $user->update($validated);
 
     return $this->sendResponse($user, 'Account updated successfully.');
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
 }
 
 
 // change password
 public function updatePassword(Request $request)
 {
+    try{
     // Validate the request
     $validatedData = $request->validate([
         'current_password' => 'required',
@@ -171,6 +210,10 @@ public function updatePassword(Request $request)
         'status' => 'success',
         'message' => 'Password updated successfully.'
     ], 200);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
 }
 
 
