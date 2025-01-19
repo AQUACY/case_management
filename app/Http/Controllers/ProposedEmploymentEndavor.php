@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Notifications\ReviewRequestNotification;
 use App\Models\Cases;
 use App\Mail\ReviewRequestMailEndavor;
+use App\Mail\ReviewApprovedMail;
+use App\Mail\ReviewPendingMail;
 
 
 // use Log;
@@ -168,8 +170,8 @@ class ProposedEmploymentEndavor extends Controller
             return response()->json(['message' => 'Case Manager not found'], 404);
         }
 
-        // // Trigger Email
-        // Mail::to($caseManager->email)->send(new ReviewRequestMailEndavor($record));
+        // Trigger Email
+        Mail::to($caseManager->email)->send(new ReviewRequestMailEndavor($record));
 
         // Trigger Notification
         $caseManager->notify(new ReviewRequestNotification($record));
@@ -181,6 +183,51 @@ class ProposedEmploymentEndavor extends Controller
 
     return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
 }
+}
+
+// respond to review
+
+public function respondToReview(Request $request, $caseId)
+{
+    try {
+        $validatedData = $request->validate([
+            'response' => 'required|in:approved,pending',
+        ]);
+
+        $record = ProposedEmploymentEndavorRecord::where('case_id', $caseId)->first();
+
+        if (!$record) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+
+        $case = Cases::find($caseId);
+
+        if (!$case) {
+            return response()->json(['message' => 'Case not found'], 404);
+        }
+
+        $assignedUser = $case->user;  // Assuming the relationship is defined as 'assignedUser'
+
+        if (!$assignedUser) {
+            return response()->json(['message' => 'Assigned user not found'], 404);
+        }
+
+        // Update status based on response
+        if ($validatedData['response'] === 'approved') {
+            $record->status = 'finalized';
+            $record->save();
+
+            // Send email notification to the assigned user
+            Mail::to($assignedUser->email)->send(new ReviewApprovedMail($record));
+        } else {
+            // Send email/notification about pending status
+            Mail::to($assignedUser->email)->send(new ReviewPendingMail($record));
+        }
+
+        return response()->json(['message' => 'Response submitted successfully']);
+    } catch (Exception $e) {
+        return response()->json(['message' => 'Error submitting response', 'error' => $e->getMessage()], 500);
+    }
 }
 
 }

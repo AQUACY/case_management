@@ -45,6 +45,7 @@ Route::group([
     Route::post('/cases/{caseId}/addendavorrecords', [ProposedEmploymentEndavor::class, 'storeOrUpdate']);
     Route::get('/cases/{caseId}/getendavorrecords', [ProposedEmploymentEndavor::class, 'get']);
     Route::post('/request-review/{caseId}/request-review', [ProposedEmploymentEndavor::class, 'requestReview']);
+    Route::post('/cases/{caseId}/review-response', [ProposedEmploymentEndavor::class, 'respondToReview']);
     Route::get('/client-records/{caseId}', [ClientRecordController::class, 'index']);
     Route::delete('/client-records/{clientRecordId}/dependents/{dependentId}', [ClientRecordController::class, 'deleteDependent']);
     Route::post('/client-records/{caseId}/add', [ClientRecordController::class, 'store']);
