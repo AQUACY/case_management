@@ -19,6 +19,7 @@ class Message extends Model
         'status',
         'rating',
         'sender_type', // 'user' or 'case_manager'
+        'case_id'
     ];
 
     public function category()
@@ -35,9 +36,14 @@ class Message extends Model
     {
         return $this->belongsTo(User::class, 'case_manager_id');
     }
-    public function case()
+//     public function case()
+// {
+//     return $this->belongsTo(Cases::class);
+// }
+public function case()
 {
-    return $this->belongsTo(Cases::class);
+    return $this->belongsTo(Cases::class, 'case_id');
 }
+
 
 }

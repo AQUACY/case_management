@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('case_questionnaires', function (Blueprint $table) {
-            $table->string('status');
+             $table->string('status')->nullable()->default('pending');
         });
     }
 

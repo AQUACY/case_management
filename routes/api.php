@@ -39,12 +39,14 @@ Route::group([
     Route::patch('/messages/{id}/rate', [MessageController::class, 'rateResponse']); // Rate a response
     Route::post('/cases/{caseId}/questionnaire', [CaseQuestionnaireController::class, 'store']);
     Route::post('/questionnaires/{id}/request-review', [CaseQuestionnaireController::class, 'requestReview']);
+    Route::get('/cases/questionnaire/{caseId}', [CaseQuestionnaireController::class, 'view']);
     Route::post('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'updateOrCreate']);
     Route::get('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'getPublicationRecord']);
     Route::post('/cases/{caseId}/addendavorrecords', [ProposedEmploymentEndavor::class, 'storeOrUpdate']);
     Route::get('/cases/{caseId}/getendavorrecords', [ProposedEmploymentEndavor::class, 'get']);
     Route::post('/request-review/{caseId}/request-review', [ProposedEmploymentEndavor::class, 'requestReview']);
     Route::get('/client-records/{caseId}', [ClientRecordController::class, 'index']);
+    Route::delete('/client-records/{clientRecordId}/dependents/{dependentId}', [ClientRecordController::class, 'deleteDependent']);
     Route::post('/client-records/{caseId}/add', [ClientRecordController::class, 'store']);
     Route::get('/cases/mycase/{userId}', [CaseManagerController::class, 'showByUserId']);
 
@@ -83,7 +85,7 @@ Route::prefix('cases/{caseId}')->group(function () {
     Route::get('/documents', [DocumentController::class, 'viewDocuments']);
     Route::delete('/documents/{documentId}', [DocumentController::class, 'deleteDocument']);
     Route::get('/documents/{documentId}/download', [DocumentController::class, 'downloadDocument']);
-    Route::get('/messages', [MessageController::class, 'getMessagesForCase']);
+    Route::get('/messages', [MessageController::class, 'getMessagesByCaseId']);
 });
 
 Route::post('password/forgot', [AuthController::class, 'forgotPassword']);

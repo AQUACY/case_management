@@ -251,26 +251,23 @@ public function respondToCaseMessage(Request $request, $messageId)
     return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
 }
 }
-
-public function getMessagesForCase($caseId)
+public function getMessagesByCaseId($caseId)
 {
     try {
-        // Ensure that the case exists
-        $case = Cases::findOrFail($caseId);
-
-        // Fetch all messages associated with the given case
-        $messages = $case->messages()->get();
+        $messages = Message::where('case_id', $caseId)->get();
 
         return response()->json([
             'success' => true,
-            'message' => 'Messages retrieved successfully.',
-            'data' => $messages,
-        ], 200);
+            'messages' => $messages,
+        ]);
     } catch (Exception $e) {
-        // Log error and return response
-        return response()->json(['message' => 'Error fetching messages', 'error' => $e->getMessage()], 500);
+        return response()->json([
+            'message' => 'Error fetching messages',
+            'error' => $e->getMessage(),
+        ], 500);
     }
 }
+
 
 
 }

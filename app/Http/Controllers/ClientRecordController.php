@@ -140,25 +140,41 @@ class ClientRecordController extends Controller
 
 public function index($caseId)
 {
+    try{
     // Retrieve the ClientRecord along with its related case and dependents using case_id
     $caseClientRecords = ClientRecord::with('case', 'dependents')->where('case_id', $caseId)->firstOrFail();
 
     return response()->json($caseClientRecords);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+}
 }
 
 
-public function deleteDependent($clientRecordId)
+public function deleteDependent($clientRecordId, $dependentId)
 {
-    try{
-        $dependents = Dependent::where('client_record_id', $clientRecordId)->firstOrFail();
-        $dependents->delete();
-        return response()->json(['message' => 'Dependent deleted successfully.'], 200);
-    }catch (Exception $e) {
-        // Log error and return response
-        return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
-    }
+    try {
+        // Fetch the specific dependent for the given client record
+        $dependent = Dependent::where('client_record_id', $clientRecordId)
+                              ->where('id', $dependentId)
+                              ->first();
 
+        if (!$dependent) {
+            return response()->json(['message' => 'Dependent not found.'], 404);
+        }
+
+        // Delete the dependent
+        $dependent->delete();
+
+        return response()->json(['message' => 'Dependent deleted successfully.'], 200);
+    } catch (Exception $e) {
+        // Log error and return response
+        return response()->json(['message' => 'Error deleting dependent', 'error' => $e->getMessage()], 500);
+    }
 }
+
+
 
 public function deleteClientRecord($caseId)
 {

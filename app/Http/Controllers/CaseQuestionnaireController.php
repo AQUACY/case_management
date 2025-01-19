@@ -7,13 +7,43 @@ use App\Models\Cases;
 use Illuminate\Http\Request;
 use App\Mail\ReviewRequestMail;
 use Illuminate\Support\Facades\Mail;
+use Exception;
 
 
 
 class CaseQuestionnaireController extends Controller
 {
+    // get questionnaire
+    public function view($caseId)
+{
+    try {
+        // Retrieve the case questionnaire by case_id
+        $caseQuestionnaire = CaseQuestionnaire::where('case_id', $caseId)->with('familyMembers')->first();
+
+        // Check if the questionnaire exists
+        if (!$caseQuestionnaire) {
+            return response()->json([
+                'message' => 'Case Questionnaire not found'
+            ], 404);
+        }
+
+        // Return the case questionnaire along with its family members
+        return response()->json([
+            'success' => true,
+            'data' => $caseQuestionnaire
+        ]);
+    } catch (Exception $e) {
+        // Handle any errors
+        return response()->json([
+            'message' => 'Error fetching Case Questionnaire',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
     public function store(Request $request, $caseId)
     {
+        try{
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
              'case_id' => 'required|exists:cases,id',
@@ -92,45 +122,48 @@ class CaseQuestionnaireController extends Controller
              'family_members.*.dob' => 'required|date',
              'family_members.*.birth_country' => 'required|string|max:255',
         ]);
-
-        $case = Cases::findOrFail($caseId);
-        // $caseQuestionnaire = $case->questionnaire()->updateOrCreate($validatedData);
-
         $caseQuestionnaire = CaseQuestionnaire::where('case_id', $caseId)->first();
 
-    // If it exists, update it, otherwise create a new one
-    if ($caseQuestionnaire) {
-        // Update or create the case questionnaire data excluding family_members
-        $caseQuestionnaire->update($request->except('family_members'));
+        if ($caseQuestionnaire) {
+            // Update existing case questionnaire
+            $caseQuestionnaire->update($request->except('family_members'));
 
-        // Add family members if provided
-        if ($request->has('family_members')) {
-            foreach ($request->family_members as $familyMemberData) {
-                $caseQuestionnaire->familyMembers()->create($familyMemberData);
+            // Update family members if provided
+            if ($request->has('family_members')) {
+                foreach ($request->family_members as $familyMemberData) {
+                    $caseQuestionnaire->familyMembers()->create($familyMemberData);
+                }
             }
-        }
 
-        // Return the response with case questionnaire and family members
-        return response()->json([
-            'message' => 'Case Questionnaire updated successfully',
-            'data' => $caseQuestionnaire->load('familyMembers')  // Load family members
-        ]);
-    } else {
-        // If no record exists, create a new one
-        $caseQuestionnaire = CaseQuestionnaire::create($validatedData);
+            return response()->json([
+                'message' => 'Case Questionnaire updated successfully',
+                'data' => $caseQuestionnaire->load('familyMembers')
+            ]);
+        } else {
+            // Set the status to 'pending'
+            $validatedData['status'] = 'pending';
 
-        // Add family members if provided
-        if ($request->has('family_members')) {
-            foreach ($request->family_members as $familyMemberData) {
-                $caseQuestionnaire->familyMembers()->create($familyMemberData);
+            // Create new case questionnaire
+            $caseQuestionnaire = CaseQuestionnaire::create($validatedData);
+
+            // Add family members if provided
+            if ($request->has('family_members')) {
+                foreach ($request->family_members as $familyMemberData) {
+                    $caseQuestionnaire->familyMembers()->create($familyMemberData);
+                }
             }
-        }
 
-        // Return the response with case questionnaire and family members
+            return response()->json([
+                'message' => 'Case Questionnaire created successfully',
+                'data' => $caseQuestionnaire->load('familyMembers')
+            ]);
+        }
+    } catch (Exception $e) {
+        // Handle any errors
         return response()->json([
-            'message' => 'Case Questionnaire created successfully',
-            'data' => $caseQuestionnaire->load('familyMembers')  // Load family members
-        ]);
+            'message' => 'Error fetching Case Questionnaire',
+            'error' => $e->getMessage()
+        ], 500);
     }
     }
 
