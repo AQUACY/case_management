@@ -49,6 +49,8 @@ Route::group([
     Route::delete('/client-records/{clientRecordId}/dependents/{dependentId}', [ClientRecordController::class, 'deleteDependent']);
     Route::post('/client-records/{caseId}/add', [ClientRecordController::class, 'store']);
     Route::get('/cases/mycase/{userId}', [CaseManagerController::class, 'showByUserId']);
+    Route::delete('/case-questionnaires/case/{caseId}', [CaseQuestionnaireController::class, 'deleteCaseQuestionnaireByCaseId']);
+    Route::delete('/case-questionnaires/case/{caseQuestionnaireId}/{familyMemberId}/delete', [CaseQuestionnaireController::class, 'deleteFamilyMember']);
 
 });
 

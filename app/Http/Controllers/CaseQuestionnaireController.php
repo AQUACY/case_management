@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Mail\ReviewRequestMail;
 use Illuminate\Support\Facades\Mail;
 use Exception;
+use ModelNotFoundException;
+use App\Models\FamilyMember;
 
 
 
@@ -41,9 +43,9 @@ class CaseQuestionnaireController extends Controller
     }
 }
 
-    public function store(Request $request, $caseId)
-    {
-        try{
+public function store(Request $request, $caseId)
+{
+    try {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
              'case_id' => 'required|exists:cases,id',
@@ -65,7 +67,7 @@ class CaseQuestionnaireController extends Controller
             'birth_state' => 'nullable|string|max:255',
             'birth_country' => 'nullable|string|max:255',
             'citizenship_country' => 'nullable|string|max:255',
-            'dual_citizenship' => 'nullable|boolean',
+            'dual_citizenship' => 'nullable|in:Yes,No',
             'secondary_country' => 'nullable|string|max:255',
             'social_security_number' => 'nullable|string|max:15',
             'alien_registration_number' => 'nullable|string|max:15',
@@ -116,22 +118,33 @@ class CaseQuestionnaireController extends Controller
             'mobile_phone' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:255',
              // Family rules
+             'family_members.*.id' => 'nullable|exists:family_members,id',
              'family_members.*.family_name' => 'required|string|max:255',
              'family_members.*.given_name' => 'required|string|max:255',
              'family_members.*.relationship' => 'required|in:Spouse,Child',
              'family_members.*.dob' => 'required|date',
              'family_members.*.birth_country' => 'required|string|max:255',
         ]);
+
         $caseQuestionnaire = CaseQuestionnaire::where('case_id', $caseId)->first();
 
         if ($caseQuestionnaire) {
             // Update existing case questionnaire
             $caseQuestionnaire->update($request->except('family_members'));
 
-            // Update family members if provided
+            // Update or create family members
             if ($request->has('family_members')) {
                 foreach ($request->family_members as $familyMemberData) {
-                    $caseQuestionnaire->familyMembers()->create($familyMemberData);
+                    if (isset($familyMemberData['id'])) {
+                        // Update existing family member
+                        $familyMember = $caseQuestionnaire->familyMembers()->find($familyMemberData['id']);
+                        if ($familyMember) {
+                            $familyMember->update($familyMemberData);
+                        }
+                    } else {
+                        // Create new family member
+                        $caseQuestionnaire->familyMembers()->create($familyMemberData);
+                    }
                 }
             }
 
@@ -161,11 +174,11 @@ class CaseQuestionnaireController extends Controller
     } catch (Exception $e) {
         // Handle any errors
         return response()->json([
-            'message' => 'Error fetching Case Questionnaire',
+            'message' => 'Error updating Case Questionnaire',
             'error' => $e->getMessage()
         ], 500);
     }
-    }
+}
 
     public function show($id)
     {
@@ -195,5 +208,63 @@ class CaseQuestionnaireController extends Controller
             'message' => 'Review request has been sent to the case manager.'
         ], 200);
     }
+
+    // delete casequestionnaire
+    public function deleteCaseQuestionnaireByCaseId($caseId)
+    {
+        try {
+            // Find the CaseQuestionnaire by case_id
+            $caseQuestionnaire = CaseQuestionnaire::where('case_id', $caseId)->firstOrFail();
+
+            // Delete the CaseQuestionnaire
+            $caseQuestionnaire->delete();
+
+            // Return a success response
+            return response()->json([
+                'message' => 'CaseQuestionnaire deleted successfully.'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            // Return a not found response
+            return response()->json([
+                'message' => 'CaseQuestionnaire not found.'
+            ], 404);
+        } catch (Exception $e) {
+            // Return a general error response
+            return response()->json([
+                'message' => 'Error deleting CaseQuestionnaire',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function deleteFamilyMember($caseQuestionnaireId, $familyMemberId)
+    {
+        try {
+            // Find the family member by ID and check if it belongs to the given caseQuestionnaireId
+            $familyMember = FamilyMember::where('id', $familyMemberId)
+                ->where('case_questionnaire_id', $caseQuestionnaireId)
+                ->firstOrFail();
+
+            // Delete the family member
+            $familyMember->delete();
+
+            // Return a success response
+            return response()->json([
+                'message' => 'Family member deleted successfully.'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            // Return a not found response
+            return response()->json([
+                'message' => 'Family member not found or does not belong to the specified case questionnaire.'
+            ], 404);
+        } catch (Exception $e) {
+            // Return a general error response
+            return response()->json([
+                'message' => 'Error deleting family member',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 
 }
