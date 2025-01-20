@@ -13,8 +13,8 @@ use App\Http\Controllers\CaseQuestionnaireController;
 use App\Http\Controllers\PublicationRecordController;
 use App\Http\Controllers\ProposedEmploymentEndavor;
 use App\Http\Controllers\ClientRecordController;
-
-
+use App\Http\Controllers\BackgroundInformationController;
+use App\Http\Controllers\AchievementController;
 
 
 Route::group([
@@ -52,7 +52,14 @@ Route::group([
     Route::get('/cases/mycase/{userId}', [CaseManagerController::class, 'showByUserId']);
     Route::delete('/case-questionnaires/case/{caseId}', [CaseQuestionnaireController::class, 'deleteCaseQuestionnaireByCaseId']);
     Route::delete('/case-questionnaires/case/{caseQuestionnaireId}/{familyMemberId}/delete', [CaseQuestionnaireController::class, 'deleteFamilyMember']);
+    Route::get('/background-information', [BackgroundInformationController::class, 'index']);
+    Route::get('/background-information/{caseId}', [BackgroundInformationController::class, 'show']);
+    Route::post('/background-information/{caseId}', [BackgroundInformationController::class, 'storeOrUpdate']);
 
+    // additional qualifications (achievements)
+    Route::get('/case/additional-qualification', [AchievementController::class, 'index']);
+    Route::post('/additional-qualification/{caseId}', [AchievementController::class, 'store']);
+    Route::get('/additional-qualification/{caseId}', [AchievementController::class, 'show']);
 });
 
 // admin middle ware
@@ -74,6 +81,8 @@ Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::delete('/admin/cases/{caseId}/publication-records', [PublicationRecordController::class, 'destroyAll']);
     Route::delete('/admin/cases/{caseId}/deleteendavorrecords', [ProposedEmploymentEndavor::class, 'delete']);
     Route::delete('/admin/client-records/{caseId}', [ClientRecordController::class, 'deleteClientRecord']);
+    Route::delete('/admin/additional-qualification/{caseId}', [AchievementController::class, 'destroy']);
+    Route::delete('/admin/background-information/{caseId}', [BackgroundInformationController::class, 'destroy']);
 });
 
 // case middle
