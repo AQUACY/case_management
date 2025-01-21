@@ -21,6 +21,10 @@ class Achievement extends Model
         'notable_memberships', 'name_of_organization_in_membership', 'level_of_membership', 'requirements_for_membership', 'who_judges_membership_eligibility',
         'notable_media_coverage', 'title_of_article', 'date_published', 'author', 'magazine_newspaper_website', 'circulation', 'summary_of_article_focus', 'relevance_to_original_work',
         'invitations', 'conference_title_1', 'conference_month_year_1', 'details_of_invitation_1', 'conference_title_2', 'conference_month_year_2', 'details_of_invitation_2', 'conference_title_3', 'conference_month_year_3', 'details_of_invitation_3',
-        'filing_eb1a', 'total_combined_salary', 'no_achievement_for_eb1a', 'field_for_filing'
+        'filing_eb1a', 'total_combined_salary', 'no_achievement_for_eb1a', 'field_for_filing', 'status'
     ];
+    public function case()
+    {
+        return $this->belongsTo(Cases::class);
+    }
 }

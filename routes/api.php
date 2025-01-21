@@ -15,6 +15,7 @@ use App\Http\Controllers\ProposedEmploymentEndavor;
 use App\Http\Controllers\ClientRecordController;
 use App\Http\Controllers\BackgroundInformationController;
 use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\ProjectController;
 
 
 Route::group([
@@ -60,6 +61,11 @@ Route::group([
     Route::get('/case/additional-qualification', [AchievementController::class, 'index']);
     Route::post('/additional-qualification/{caseId}', [AchievementController::class, 'store']);
     Route::get('/additional-qualification/{caseId}', [AchievementController::class, 'show']);
+
+    // contributions
+    Route::get('/case/contributions', [ProjectController::class, 'index']);
+    Route::post('/case/contributions/{caseId}', [ProjectController::class, 'store']);
+    Route::get('/case/contributions/{caseId}', [ProjectController::class, 'show']);
 });
 
 // admin middle ware

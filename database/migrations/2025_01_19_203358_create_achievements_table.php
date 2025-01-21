@@ -83,6 +83,7 @@ return new class extends Migration
             $table->string('total_combined_salary')->nullable();
             $table->boolean('no_achievement_for_eb1a')->default(false);
             $table->string('field_for_filing')->nullable();
+            $table->enum('status', ['pending', 'approved'])->default('pending');
             $table->timestamps();
 
             $table->foreign('case_id')->references('id')->on('cases')->onDelete('cascade');
