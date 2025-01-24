@@ -14,4 +14,8 @@ class Payment extends Model
         'note',
         'transaction_id'
     ];
+    public static function getPaymentsByCaseId($caseId)
+{
+    return self::where('case_id', $caseId)->orderBy('created_at', 'desc')->get();
+}
 }

@@ -69,6 +69,7 @@ Route::group([
     Route::get('/case/contributions/{caseId}', [ProjectController::class, 'show']);
 
     // payments
+    Route::get('/payment/{caseId}', [PaymentController::class, 'getPaymentsByCaseId']);
     Route::post('/payment/{caseId}', [PaymentController::class, 'processPayment']);
     Route::post('/process-payment/{caseId}', [PaymentController::class, 'paymentCallback']);
     Route::get('/payment/{caseId}/success', [PaymentController::class, 'success']);

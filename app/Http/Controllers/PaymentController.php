@@ -6,9 +6,26 @@ use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use App\Models\Payment; // Assuming you have a Payment model to track payments
+use Exception;
 
 class PaymentController extends Controller
 {
+    public function getPaymentsByCaseId($caseId)
+    {
+        try {
+            $payments = Payment::getPaymentsByCaseId($caseId);
+
+            if ($payments->isEmpty()) {
+                return response()->json(['message' => 'No payments found for this case ID'], 404);
+            }
+
+            return response()->json(['payments' => $payments], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error fetching payments', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function processPayment(Request $request)
 {
     try{
