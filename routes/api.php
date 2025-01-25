@@ -74,6 +74,9 @@ Route::group([
     Route::post('/process-payment/{caseId}', [PaymentController::class, 'paymentCallback']);
     Route::get('/payment/{caseId}/success', [PaymentController::class, 'success']);
     Route::get('/payment/{caseId}/fail', [PaymentController::class, 'fail']);
+
+    // cases
+    Route::get('/casemanager/viewallcase', [CaseManagerController::class, 'index']);
 });
 
 // admin middle ware
