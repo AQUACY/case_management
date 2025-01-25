@@ -20,7 +20,7 @@ class PaymentController extends Controller
             }
 
             return response()->json(['payments' => $payments], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['message' => 'Error fetching payments', 'error' => $e->getMessage()], 500);
         }
     }
@@ -62,10 +62,10 @@ class PaymentController extends Controller
             'clientSecret' => $paymentIntent->client_secret,
             'message' => 'Payment initiated',
         ]);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
-} catch (\Exception $e) {
+} catch (Exception $e) {
     return response()->json(['error' => $e->getMessage()], 500);
 }
 }
@@ -89,10 +89,10 @@ public function paymentCallback(Request $request)
         ]);
 
         return response()->json(['message' => 'Payment updated successfully']);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
-} catch (\Exception $e) {
+} catch (Exception $e) {
     return response()->json(['error' => $e->getMessage()], 500);
 }
 }
