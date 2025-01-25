@@ -27,6 +27,9 @@ return [
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET_KEY_TEST'),
+    ],
 
     'slack' => [
         'notifications' => [

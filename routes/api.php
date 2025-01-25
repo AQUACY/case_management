@@ -16,6 +16,7 @@ use App\Http\Controllers\ClientRecordController;
 use App\Http\Controllers\BackgroundInformationController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PaymentController;
 
 
 Route::group([
@@ -66,6 +67,13 @@ Route::group([
     Route::get('/case/contributions', [ProjectController::class, 'index']);
     Route::post('/case/contributions/{caseId}', [ProjectController::class, 'store']);
     Route::get('/case/contributions/{caseId}', [ProjectController::class, 'show']);
+
+    // payments
+    Route::get('/payment/{caseId}', [PaymentController::class, 'getPaymentsByCaseId']);
+    Route::post('/payment/{caseId}', [PaymentController::class, 'processPayment']);
+    Route::post('/process-payment/{caseId}', [PaymentController::class, 'paymentCallback']);
+    Route::get('/payment/{caseId}/success', [PaymentController::class, 'success']);
+    Route::get('/payment/{caseId}/fail', [PaymentController::class, 'fail']);
 });
 
 // admin middle ware
