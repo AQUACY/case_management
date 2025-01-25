@@ -77,6 +77,7 @@ Route::group([
 
     // cases
     Route::get('/casemanager/viewallcase', [CaseManagerController::class, 'index']);
+    Route::get('/viewcase/{caseId}', [CaseManagerController::class, 'show']);
 });
 
 // admin middle ware
