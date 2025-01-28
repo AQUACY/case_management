@@ -17,6 +17,25 @@ use Exception;
 
 class ProposedEmploymentEndavor extends Controller
 {
+
+    public function index()
+    {
+        try {
+            // Retrieve all case questionnaires with their family members
+            $proposedEmploymentEndavors = ProposedEmploymentEndavorRecord::with(['case'])->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $proposedEmploymentEndavors
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving proposed employment endeavor records',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
  /**
      * Store or update a record for a given case ID.
      */
@@ -171,6 +190,7 @@ class ProposedEmploymentEndavor extends Controller
         }
 
         // Trigger Email
+
         Mail::to($caseManager->email)->send(new ReviewRequestMailEndavor($record));
 
         // Trigger Notification
@@ -220,6 +240,8 @@ public function respondToReview(Request $request, $caseId)
             // Send email notification to the assigned user
             Mail::to($assignedUser->email)->send(new ReviewApprovedMail($record));
         } else {
+            $record->status = 'pending';
+            $record->save();
             // Send email/notification about pending status
             Mail::to($assignedUser->email)->send(new ReviewPendingMail($record));
         }
