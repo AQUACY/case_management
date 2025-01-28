@@ -37,7 +37,7 @@ return new class extends Migration
             $table->longText('benefit_us_issue_3');
             $table->longText('benefit_us_issue_3_discussion_field_1');
             $table->longText('benefit_us_issue_3_discussion_field_2');
-            $table->enum('status', ['pending', 'approved'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'review'])->default('pending');
             $table->timestamps();
 
             $table->foreign('case_id')->references('id')->on('cases')->onDelete('cascade');

@@ -60,16 +60,24 @@ Route::group([
     Route::get('/background-information', [BackgroundInformationController::class, 'index']);
     Route::get('/background-information/{caseId}', [BackgroundInformationController::class, 'show']);
     Route::post('/background-information/{caseId}', [BackgroundInformationController::class, 'storeOrUpdate']);
+    Route::post('/background-information/{caseId}/respond-review', [BackgroundInformationController::class, 'respondToReview']);
+    Route::get('/background-information/{caseId}/review-comments', [BackgroundInformationController::class, 'getReviewComments']);
 
     // additional qualifications (achievements)
     Route::get('/case/additional-qualification', [AchievementController::class, 'index']);
     Route::post('/additional-qualification/{caseId}', [AchievementController::class, 'store']);
     Route::get('/additional-qualification/{caseId}', [AchievementController::class, 'show']);
+    Route::post('/additional-qualification/{caseId}/request-review', [AchievementController::class, 'requestReview']);
+    Route::post('/additional-qualification/{caseId}/respond-review', [AchievementController::class, 'respondToReview']);
+    Route::get('/additional-qualification/{caseId}/review-comments', [AchievementController::class, 'getReviewComments']);
 
     // contributions
     Route::get('/case/contributions', [ProjectController::class, 'index']);
     Route::post('/case/contributions/{caseId}', [ProjectController::class, 'store']);
     Route::get('/case/contributions/{caseId}', [ProjectController::class, 'show']);
+    Route::post('/case/contributions/{caseId}/request-review', [ProjectController::class, 'requestReview']);
+    Route::post('/case/contributions/{caseId}/respond-review', [ProjectController::class, 'respondToReview']);
+    Route::get('/case/contributions/{caseId}/review-comments', [ProjectController::class, 'getReviewComments']);
 
     // payments
     Route::get('/payment/{caseId}', [PaymentController::class, 'getPaymentsByCaseId']);
@@ -81,6 +89,16 @@ Route::group([
     // cases
     Route::get('/casemanager/viewallcase', [CaseManagerController::class, 'index']);
     Route::get('/viewcase/{caseId}', [CaseManagerController::class, 'show']);
+
+    // respond review route
+    Route::post('/background-information/{caseId}/request-review', [BackgroundInformationController::class, 'requestReview']);
+
+
+    // messging converstation
+
+Route::post('/messages/{messageId}/reply', [MessageController::class, 'replyToMessage']);
+Route::get('/messages/{messageId}/conversation', [MessageController::class, 'getMessageConversation']);
+Route::get('/messages/unread-count', [MessageController::class, 'getUnreadMessageCount']);
 });
 
 // admin middle ware
@@ -130,3 +148,4 @@ Route::post('/register', [AuthController::class, 'register']);
 //     return $request->user();
 
 // })->middleware('auth:sanctum');
+
