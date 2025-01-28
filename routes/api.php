@@ -41,11 +41,14 @@ Route::group([
     Route::patch('/messages/{id}/rate', [MessageController::class, 'rateResponse']); // Rate a response
     Route::post('/cases/{caseId}/questionnaire', [CaseQuestionnaireController::class, 'store']);
     Route::post('/questionnaires/{id}/request-review', [CaseQuestionnaireController::class, 'requestReview']);
+    Route::post('/cases/{caseId}/questionnaire/respond', [CaseQuestionnaireController::class, 'respondToReview']);
     Route::get('/cases/questionnaire/{caseId}', [CaseQuestionnaireController::class, 'view']);
     Route::post('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'updateOrCreate']);
     Route::get('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'getPublicationRecord']);
     Route::post('/cases/{caseId}/addendavorrecords', [ProposedEmploymentEndavor::class, 'storeOrUpdate']);
     Route::get('/cases/{caseId}/getendavorrecords', [ProposedEmploymentEndavor::class, 'get']);
+    Route::get('/cases/questionnaire', [CaseQuestionnaireController::class, 'index']);
+    Route::get('/cases/proposed-employment-endavors', [ProposedEmploymentEndavor::class, 'index']);
     Route::post('/request-review/{caseId}/request-review', [ProposedEmploymentEndavor::class, 'requestReview']);
     Route::post('/cases/{caseId}/review-response', [ProposedEmploymentEndavor::class, 'respondToReview']);
     Route::get('/client-records/{caseId}', [ClientRecordController::class, 'index']);

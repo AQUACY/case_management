@@ -147,7 +147,7 @@ public function index($caseId)
     return response()->json($caseClientRecords);
 }catch (Exception $e) {
     // Log error and return response
-    return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    return response()->json(['message' => 'Error viewing record', 'error' => $e->getMessage()], 500);
 }
 }
 

@@ -60,7 +60,6 @@ class MessageController extends Controller
         'category_id' => 'required|exists:message_categories,id',
         'subject' => 'required|string|max:255',
         'message' => 'required|string',
-        'case_id' => 'required|exists:cases,id'
     ]);
 
     // Ensure that the case exists by case_id
@@ -254,7 +253,10 @@ public function respondToCaseMessage(Request $request, $messageId)
 public function getMessagesByCaseId($caseId)
 {
     try {
-        $messages = Message::where('case_id', $caseId)->get();
+        $messages = Message::where('case_id', $caseId)
+                         ->with(['user', 'caseManager', 'category'])
+                         ->orderBy('created_at', 'desc')
+                         ->get();
 
         return response()->json([
             'success' => true,

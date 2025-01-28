@@ -11,17 +11,17 @@ class ReviewPendingMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $record;
+    public $emailData;
 
-    public function __construct(ProposedEmploymentEndavorRecord $record)
+    public function __construct($emailData)
     {
-        $this->record = $record;
+        $this->emailData = $emailData;
     }
 
     public function build()
     {
         return $this->subject('Your Review Request is Pending')
                     ->view('emails.reviewPending')
-                    ->with('record', $this->record);
+                    ->with('emailData', $this->emailData);
     }
 }

@@ -10,11 +10,33 @@ use Illuminate\Support\Facades\Mail;
 use Exception;
 use ModelNotFoundException;
 use App\Models\FamilyMember;
+use App\Mail\ReviewApprovedMail;
+use App\Mail\ReviewPendingMail;
+use Illuminate\Support\Facades\Log;
 
 
 
 class CaseQuestionnaireController extends Controller
 {
+
+    public function index()
+    {
+        try {
+            // Retrieve all case questionnaires with their family members
+            $caseQuestionnaires = CaseQuestionnaire::with(['familyMembers', 'case'])->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $caseQuestionnaires
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving case questionnaires',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     // get questionnaire
     public function view($caseId)
 {
@@ -209,6 +231,60 @@ public function store(Request $request, $caseId)
         ], 200);
     }
 
+    // respond to review
+    public function respondToReview(Request $request, $caseId)
+    {
+        try {
+            $validatedData = $request->validate([
+                'response' => 'required|in:approved,pending',
+            ]);
+
+            $caseQuestionnaire = CaseQuestionnaire::where('case_id', $caseId)->first();
+
+            if (!$caseQuestionnaire) {
+                return response()->json([
+                    'message' => 'Case Questionnaire not found',
+                    'error' => 'Case Questionnaire not found'
+                ], 404);
+            }
+
+            $caseQuestionnaire->status = $validatedData['response'];
+            $caseQuestionnaire->save();
+
+            return response()->json([
+                'message' => 'Review response has been saved.',
+            ], 200);
+            // Get the case and assigned user
+            if (!$case || !$case->user) {
+                return response()->json(['message' => 'Case or assigned user not found'], 404);
+            }
+
+            // Send appropriate email based on response
+            if ($validatedData['response'] === 'approved') {
+                // Get user name and order number for the email
+                $emailData = [
+                    'client_name' => $case->user->name,
+                    'case_id' => $case->order_number
+                ];
+                Mail::to($case->user->email)->send(new ReviewApprovedMail($emailData));
+                Log::info('Sending approval email to: ' . $case->user->email);
+            } else {
+                $emailData = [
+                    'client_name' => $case->user->name,
+                    'case_id' => $case->order_number
+                ];
+                Mail::to($case->user->email)->send(new ReviewPendingMail($emailData));
+                Log::info('Sending pending email to: ' . $case->user->email);
+            }
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error validating request',
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
     // delete casequestionnaire
     public function deleteCaseQuestionnaireByCaseId($caseId)
     {
@@ -223,7 +299,7 @@ public function store(Request $request, $caseId)
             return response()->json([
                 'message' => 'CaseQuestionnaire deleted successfully.'
             ], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (Exception $e) {
             // Return a not found response
             return response()->json([
                 'message' => 'CaseQuestionnaire not found.'
@@ -251,7 +327,7 @@ public function store(Request $request, $caseId)
             return response()->json([
                 'message' => 'Family member deleted successfully.'
             ], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (Exception $e) {
             // Return a not found response
             return response()->json([
                 'message' => 'Family member not found or does not belong to the specified case questionnaire.'
