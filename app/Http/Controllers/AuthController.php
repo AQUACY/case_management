@@ -13,6 +13,7 @@ use App\Mail\GuestCredentialsMail;
 use Illuminate\Support\Facades\Mail;
 use Log;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends BaseController
 {
@@ -31,12 +32,16 @@ class AuthController extends BaseController
             return response()->json(['error' => $validator->errors()], 422);
         }
 
+        // Get role ID first
+        $role = Role::where('name', $request->role)->first();
+
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
+        $input['role_id'] = $role->id; // Add role_id to input
         $user = User::create($input);
 
         // Assign role
-        $user->roles()->attach(Role::where('name', $request->role)->first());
+        $user->roles()->attach($role);
 
         // Trigger guest email
         if ($request->role === 'guest') {
@@ -55,7 +60,7 @@ class AuthController extends BaseController
 try{
     $credentials = request(['email', 'password']);
 
-    if(! $token = auth()->attempt($credentials)){
+    if(! $token = Auth::attempt($credentials)){
         return $this->sendError('Unauthorized.',['error' => 'Unauthorized']);
     }
 

@@ -8,10 +8,12 @@ use App\Models\Message;
 use App\Models\MessageCategory;
 use App\Models\User;
 use App\Models\Cases;
+use App\Models\MessageConversation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Exception;
 use Log;
+use Spatie\Permission\Models\Role;
 
 class MessageController extends Controller
 {
@@ -104,6 +106,8 @@ class MessageController extends Controller
     return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
 }
 }
+
+
 
     /**
      * Respond to an existing message.
@@ -204,7 +208,7 @@ class MessageController extends Controller
         'message' => $request->message,
         'status' => 'pending',
         'sender_type' => 'Case Manager',
-        'case_manager_id' => auth()->id(),
+        'case_manager_id' => auth()->user()->id,
     ]);
 
     // Notify the user
@@ -266,6 +270,162 @@ public function getMessagesByCaseId($caseId)
         return response()->json([
             'message' => 'Error fetching messages',
             'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
+public function replyToMessage(Request $request, $messageId)
+{
+    try {
+        $request->validate([
+            'content' => 'required|string',
+        ]);
+
+        // Find the original message
+        $message = Message::with(['user', 'caseManager'])->findOrFail($messageId);
+
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // Determine sender type
+        $senderType = 'user';
+        // Check if user has case manager role
+        if ($user->hasRole('Case Manager')) {
+            $senderType = 'case_manager';
+
+            // Verify if the case manager is assigned to this message
+            if ($message->case_manager_id !== $user->id) {
+                return response()->json([
+                    'message' => 'You are not authorized to reply to this message'
+                ], 403);
+            }
+        } else {
+            // Verify if the user owns this message
+            if ($message->user_id !== $user->id) {
+                return response()->json([
+                    'message' => 'You are not authorized to reply to this message'
+                ], 403);
+            }
+        }
+
+        // Create the reply
+        $reply = MessageConversation::create([
+            'message_id' => $messageId,
+            'content' => $request->content,
+            'sender_id' => $user->id,
+            'sender_type' => $senderType,
+        ]);
+
+        // Update message status
+        $message->status = 'pending';
+        $message->save();
+
+        // Send email notification
+        $recipientEmail = $senderType === 'user' ? $message->caseManager->email : $message->user->email;
+        $platformUrl = config('app.url');
+
+        Mail::to($recipientEmail)->send(new MessageNotificationMail($message, $platformUrl));
+
+        return response()->json([
+            'message' => 'Reply sent successfully',
+            'data' => $reply->load('sender:id,name')
+        ]);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error sending reply',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+public function getMessageConversation($messageId)
+{
+    try {
+        // Get authenticated user first
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $message = Message::with([
+            'user:id,name,email',
+            'caseManager:id,name,email',
+            'category:id,name'
+        ])->findOrFail($messageId);
+
+        // Check if user is authorized to view this conversation
+        if ($user->id !== $message->user_id && $user->id !== $message->case_manager_id) {
+            return response()->json([
+                'message' => 'You are not authorized to view this conversation'
+            ], 403);
+        }
+
+        // Get all replies for this message
+        $conversation = MessageConversation::where('message_id', $messageId)
+            ->with('sender:id,name')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Mark unread messages as read for the current user
+        MessageConversation::where('message_id', $messageId)
+            ->where('sender_id', '!=', $user->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return response()->json([
+            'message' => $message,
+            'conversation' => $conversation
+        ]);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error retrieving conversation',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+public function getUnreadMessageCount()
+{
+    try {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        // For regular users
+        $query = MessageConversation::whereHas('message', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->where('sender_type', 'case_manager')
+          ->where('is_read', false);
+
+        // For case managers
+        if ($user->hasRole('Case Manager')) {
+            $query = MessageConversation::whereHas('message', function ($q) use ($user) {
+                $q->where('case_manager_id', $user->id);
+            })->where('sender_type', 'user')
+              ->where('is_read', false);
+        }
+
+        $count = $query->count();
+
+        return response()->json([
+            'unread_count' => $count
+        ]);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error getting unread count',
+            'error' => $e->getMessage()
         ], 500);
     }
 }

@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Achievement;
 use Illuminate\Http\Request;
 use Exception;
+use App\Models\AchievementReviewComment;
+use App\Mail\AchievementReviewMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\Cases;
 
 class AchievementController extends Controller
 {
@@ -155,6 +159,135 @@ class AchievementController extends Controller
     }
 }
 
+public function requestReview($caseId)
+{
+    try {
+        $achievement = Achievement::where('case_id', $caseId)->first();
+
+        if (!$achievement) {
+            return response()->json(['message' => 'Achievement not found'], 404);
+        }
+
+        // Retrieve the case by ID
+        $case = Cases::find($caseId);
+
+        if (!$case) {
+            return response()->json(['message' => 'Case not found'], 404);
+        }
+
+        // Access the case manager's email through the relationship
+        $caseManager = $case->caseManager;
+
+        if (!$caseManager) {
+            return response()->json(['message' => 'Case Manager not found'], 404);
+        }
+
+        // Update status and save
+        $achievement->status = 'review';
+        $achievement->save();
+
+        // Send email notification
+        Mail::to($caseManager->email)->send(new AchievementReviewMail(
+            $achievement,
+            'review',
+            null
+        ));
+
+        return response()->json(['message' => 'Review request sent successfully']);
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error sending review request',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+public function respondToReview(Request $request, $caseId)
+{
+    try {
+        $validatedData = $request->validate([
+            'response' => 'required|in:approved,pending,review',
+            'comment' => 'required_if:response,pending|string|nullable',
+        ]);
+
+        $record = Achievement::where('case_id', $caseId)->first();
+
+        if (!$record) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+
+        $case = Cases::find($caseId);
+
+        if (!$case) {
+            return response()->json(['message' => 'Case not found'], 404);
+        }
+
+        $assignedUser = $case->user;
+        $caseManager = $case->caseManager;
+
+        if (!$assignedUser) {
+            return response()->json(['message' => 'Assigned user not found'], 404);
+        }
+
+        // Store the review comment if provided
+        if (isset($validatedData['comment'])) {
+            AchievementReviewComment::create([
+                'achievement_id' => $record->id,
+                'comment' => $validatedData['comment'],
+                'status' => $validatedData['response'],
+                'commented_by' => $caseManager->id,
+            ]);
+        }
+
+        // Update status based on response
+        $record->status = $validatedData['response'];
+        $record->save();
+
+        // Send email notification to the assigned user
+        Mail::to($assignedUser->email)->send(new AchievementReviewMail(
+            $record,
+            $validatedData['response'],
+            $validatedData['comment'] ?? null
+        ));
+
+        return response()->json([
+            'message' => 'Response submitted successfully',
+            'status' => $validatedData['response'],
+            'comment' => $validatedData['comment'] ?? null
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error submitting response',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+public function getReviewComments($caseId)
+{
+    try {
+        $record = Achievement::where('case_id', $caseId)->first();
+
+        if (!$record) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+
+        $comments = AchievementReviewComment::where('achievement_id', $record->id)
+            ->with('commentedBy:id,name')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'comments' => $comments
+        ]);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error retrieving comments',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 
 }
 
