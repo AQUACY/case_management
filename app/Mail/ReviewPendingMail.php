@@ -13,9 +13,9 @@ class ReviewPendingMail extends Mailable
 
     public $emailData;
 
-    public function __construct($emailData)
+    public function __construct(ProposedEmploymentEndavorRecord $record)
     {
-        $this->emailData = $emailData;
+        $this->emailData = $record;
     }
 
     public function build()

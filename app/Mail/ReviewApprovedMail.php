@@ -13,11 +13,10 @@ class ReviewApprovedMail extends Mailable
 
     public $emailData;
 
-    public function __construct($emailData)
+    public function __construct(ProposedEmploymentEndavorRecord $record)
     {
-        $this->emailData = $emailData;
+        $this->emailData = $record;
     }
-
     public function build()
     {
         return $this->subject('Your Review Request Has Been Approved')

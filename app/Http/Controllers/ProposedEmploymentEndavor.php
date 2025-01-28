@@ -185,11 +185,14 @@ class ProposedEmploymentEndavor extends Controller
         // Access the case manager's email through the relationship
         $caseManager = $case->caseManager;
 
+
         if (!$caseManager) {
             return response()->json(['message' => 'Case Manager not found'], 404);
         }
 
         // Trigger Email
+        $record->status = 'review';
+        $record->save();
 
         Mail::to($caseManager->email)->send(new ReviewRequestMailEndavor($record));
 
@@ -237,12 +240,18 @@ public function respondToReview(Request $request, $caseId)
             $record->status = 'finalized';
             $record->save();
 
+            $record->client_name = $case->user->name;
+            $record->order_number = $case->order_number;
             // Send email notification to the assigned user
             Mail::to($assignedUser->email)->send(new ReviewApprovedMail($record));
         } else {
             $record->status = 'pending';
             $record->save();
             // Send email/notification about pending status
+            // Get user name and case order    number
+
+            $record->client_name = $case->user->name;
+            $record->order_number = $case->order_number;
             Mail::to($assignedUser->email)->send(new ReviewPendingMail($record));
         }
 
