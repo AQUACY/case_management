@@ -17,12 +17,16 @@ use App\Http\Controllers\BackgroundInformationController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PaymentController;
+use Illuminate\Support\Facades\Broadcast;
 
+// Move this route outside of any groups and add cors middleware
+Route::middleware(['api', 'cors'])->post('/broadcasting/auth', function (Request $request) {
+    return Broadcast::auth($request);
+})->middleware('auth:api');
 
 Route::group([
     'middleware' => 'api',
     'prefix' => 'auth',
-
 ], function($router){
     // Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -99,6 +103,10 @@ Route::group([
 Route::post('/messages/{messageId}/reply', [MessageController::class, 'replyToMessage']);
 Route::get('/messages/{messageId}/conversation', [MessageController::class, 'getMessageConversation']);
 Route::get('/messages/unread-count', [MessageController::class, 'getUnreadMessageCount']);
+Route::get('/messages/categories', [MessageController::class, 'getMessageCategories']);
+
+    // Add this new route
+    Route::post('/messages/{messageId}/read', [MessageController::class, 'markAsRead']);
 });
 
 // admin middle ware
@@ -142,7 +150,6 @@ Route::prefix('cases/{caseId}')->group(function () {
 Route::post('password/forgot', [AuthController::class, 'forgotPassword']);
 Route::post('password/reset', [AuthController::class, 'resetPassword']);
 Route::post('/register', [AuthController::class, 'register']);
-
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();

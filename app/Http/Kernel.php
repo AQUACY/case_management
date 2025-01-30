@@ -54,14 +54,20 @@ class Kernel implements KernelContract
      *
      * @var array<int, class-string|string>
      */
-    protected $middleware = [];
+    protected $middleware = [
+        \App\Http\Middleware\Cors::class,
+    ];
 
     /**
      * The application's route middleware groups.
      *
      * @var array<string, array<int, class-string|string>>
      */
-    protected $middlewareGroups = [];
+    protected $middlewareGroups = [
+        'api' => [
+            \App\Http\Middleware\Cors::class,
+        ],
+    ];
 
     /**
      * The application's route middleware.
@@ -77,7 +83,9 @@ class Kernel implements KernelContract
      *
      * @var array<string, class-string|string>
      */
-    protected $middlewareAliases = [];
+    protected $middlewareAliases = [
+        'cors' => \App\Http\Middleware\Cors::class,
+    ];
 
     /**
      * All of the registered request duration handlers.
