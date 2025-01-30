@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Mail;
 use Exception;
 use Log;
 use Spatie\Permission\Models\Role;
+use App\Events\NewMessageEvent;
+use Illuminate\Support\Facades\Auth;
 
 class MessageController extends Controller
 {
@@ -32,6 +34,17 @@ class MessageController extends Controller
     }catch (Exception $e) {
         // Log error and return response
         return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
+    }
+    }
+
+    // get all message categories
+    public function getMessageCategories()
+    {
+        try{
+        $categories = MessageCategory::all();
+        return response()->json(['success' => true, 'data' => $categories], 200);
+    }catch (Exception $e) {
+        return response()->json(['message' => 'Error fetching categories', 'error' => $e->getMessage()], 500);
     }
     }
 
@@ -281,10 +294,9 @@ public function replyToMessage(Request $request, $messageId)
             'content' => 'required|string',
         ]);
 
-        // Find the original message
         $message = Message::with(['user', 'caseManager'])->findOrFail($messageId);
 
-        $user = auth()->user();
+        $user = Auth::user();
         if (!$user) {
             return response()->json([
                 'message' => 'Unauthorized'
@@ -293,8 +305,7 @@ public function replyToMessage(Request $request, $messageId)
 
         // Determine sender type
         $senderType = 'user';
-        // Check if user has case manager role
-        if ($user->hasRole('Case Manager')) {
+        if ($user->roles()->where('name', 'Case Manager')->exists()) {
             $senderType = 'case_manager';
 
             // Verify if the case manager is assigned to this message
@@ -318,21 +329,18 @@ public function replyToMessage(Request $request, $messageId)
             'content' => $request->content,
             'sender_id' => $user->id,
             'sender_type' => $senderType,
+            'is_read' => false
         ]);
 
-        // Update message status
-        $message->status = 'pending';
-        $message->save();
+        // Load the sender relationship for the broadcast
+        $reply->load('sender:id,name');
 
-        // Send email notification
-        $recipientEmail = $senderType === 'user' ? $message->caseManager->email : $message->user->email;
-        $platformUrl = config('app.url');
-
-        Mail::to($recipientEmail)->send(new MessageNotificationMail($message, $platformUrl));
+        // Broadcast the new message event
+        broadcast(new NewMessageEvent($reply))->toOthers();
 
         return response()->json([
             'message' => 'Reply sent successfully',
-            'data' => $reply->load('sender:id,name')
+            'data' => $reply
         ]);
 
     } catch (Exception $e) {
@@ -346,8 +354,7 @@ public function replyToMessage(Request $request, $messageId)
 public function getMessageConversation($messageId)
 {
     try {
-        // Get authenticated user first
-        $user = auth()->user();
+        $user = Auth::user();
         if (!$user) {
             return response()->json([
                 'message' => 'Unauthorized'
@@ -430,6 +437,41 @@ public function getUnreadMessageCount()
     }
 }
 
+public function markAsRead($messageId)
+{
+    try {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
 
+        $message = Message::with(['user', 'caseManager'])->findOrFail($messageId);
+
+        // Check if user is authorized to access this message
+        if ($user->id !== $message->user_id && $user->id !== $message->case_manager_id) {
+            return response()->json([
+                'message' => 'You are not authorized to access this message'
+            ], 403);
+        }
+
+        // Mark all unread messages in the conversation as read
+        MessageConversation::where('message_id', $messageId)
+            ->where('sender_id', '!=', $user->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return response()->json([
+            'message' => 'Messages marked as read successfully'
+        ]);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error marking messages as read',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 
 }

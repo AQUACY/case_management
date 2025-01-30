@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "php-open-source-saver/jwt-auth": "^2.3",
+        "pusher/pusher-php-server": "*",
         "spatie/laravel-permission": "^6.10",
         "stripe/stripe-php": "^16.4"
     },
