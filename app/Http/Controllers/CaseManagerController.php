@@ -10,6 +10,11 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use App\Mail\CaseContractUploadNotification;
+use App\Mail\NewCaseManagerNotification;
+use App\Mail\NewCaseUserNotification;
+use Illuminate\Support\Facades\Mail;
+
 class CaseManagerController extends Controller
 {
     // view all cases
@@ -74,84 +79,118 @@ public function showByUserId($userId)
 // create and assign case
     public function store(Request $request)
     {
-        try{
-        // Validate request data
-        $request->validate([
-            'bill' => 'required|numeric',
-            'case_manager_id' => 'required|exists:users,id',
-            'user_id' => 'required|exists:users,id',
-            'description' => 'required|string',
-            'contract_file' => 'nullable|file|mimes:pdf|max:2048',
-        ]);
-        // Generate unique order number
-        $orderNumber = 'CASE-' . strtoupper(Str::random(8));
+        try {
+            // Validate request data
+            $request->validate([
+                'bill' => 'required|numeric',
+                'case_manager_id' => 'required|exists:users,id',
+                'user_id' => 'required|exists:users,id',
+                'description' => 'required|string',
+                'contract_file' => 'nullable|file|mimes:pdf|max:2048',
+            ]);
 
-        // Create the case
-        $case = Cases::create([
-            'order_number' => $orderNumber,
-            'bill' => $request->bill,
-            'case_manager_id' => $request->case_manager_id,
-            'user_id' => $request->user_id,  // Assign the user to the case
-            'description' => $request->description,
-            'contract_file' => $contractFilePath ?? null,
-        ]);
+            // Generate unique order number
+            $orderNumber = 'CASE-' . strtoupper(Str::random(8));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Case created successfully',
-            'data' => [
+            // Create the case
+            $case = Cases::create([
+                'order_number' => $orderNumber,
+                'bill' => $request->bill,
+                'case_manager_id' => $request->case_manager_id,
+                'user_id' => $request->user_id,
+                'description' => $request->description,
+                'contract_file' => $contractFilePath ?? null,
+            ]);
+
+            // Fetch the case with relationships
+            $case = Cases::with(['user', 'caseManager'])->find($case->id);
+
+            // Generate login URL
+            $loginUrl = config('app.frontend_url') . '/login';
+
+            // Send emails
+            if ($case->caseManager) {
+                Mail::to($case->caseManager->email)
+                    ->send(new NewCaseManagerNotification($case));
+            }
+
+            if ($case->user) {
+                Mail::to($case->user->email)
+                    ->send(new NewCaseUserNotification($case, $case->caseManager, $loginUrl));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Case created successfully',
+                'data' => [
                     'case' => $case,
                     'contract_file_url' => asset('storage/' . $case->contract_file),
                 ],
-        ], 201);
-         }catch (Exception $e) {
-            // Log error and return response
-            return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
-    }
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error saving record',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 
     // upload contract file for the case
     public function uploadContractFile(Request $request, $id)
     {
-        try{
-        // Validate the file input
-        $request->validate([
-            'contract_file' => 'required|file|mimes:pdf|max:2048', // Only PDF, max size 2 MB
-        ]);
+        try {
+            // Validate the file input
+            $request->validate([
+                'contract_file' => 'required|file|mimes:pdf|max:2048',
+            ]);
 
-        // Find the case by ID
-        $case = Cases::findOrFail($id);
+            // Find the case by ID and load relationships
+            $case = Cases::with(['user', 'caseManager'])->findOrFail($id);
 
-        // Define the case-specific folder
-        $caseFolder = "contracts/case_{$case->id}";
+            // Define the case-specific folder
+            $caseFolder = "contracts/case_{$case->id}";
 
-        // Create a folder for the case if it doesn't exist
-        if (!Storage::disk('local')->exists($caseFolder)) {
-            Storage::disk('local')->makeDirectory($caseFolder);
-        }
+            // Store the contract file using the Storage facade
+            $fileName = time() . '_' . $request->file('contract_file')->getClientOriginalName();
+            $filePath = $request->file('contract_file')->storeAs(
+                $caseFolder,
+                $fileName,
+                'public' // Use the public disk instead of local
+            );
 
-        // Store the contract file in the case's folder
-        $fileName = $request->file('contract_file')->getClientOriginalName();
-        $filePath = $request->file('contract_file')->storeAs($caseFolder, $fileName, 'local');
+            if (!$filePath) {
+                throw new \Exception('Failed to store the file.');
+            }
 
-        // Update the case record with the file path
-        $case->update([
-            'contract_file' => $filePath,
-        ]);
+            // Update the case record with the file path
+            $case->update([
+                'contract_file' => $filePath,
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Contract file uploaded successfully.',
-            'file_path' => $filePath,
-        ], 201);}
-        catch (Exception $e) {
-            // Log the error to the Laravel log file
-            Log::error('Slide upload error: ' . $e->getMessage());
+            // Reload the case with relationships after update
+            $case->refresh();
 
-            // Return an error response to the client
+            // Send emails
+            if ($case->caseManager) {
+                Mail::to($case->caseManager->email)
+                    ->send(new CaseContractUploadNotification($case, false));
+            }
+
+            if ($case->user) {
+                Mail::to($case->user->email)
+                    ->send(new CaseContractUploadNotification($case, true));
+            }
+
             return response()->json([
-                'message' => 'An error occurred while uploading the slide.',
+                'success' => true,
+                'message' => 'Contract file uploaded successfully.',
+                'file_path' => Storage::url($filePath), // Get the public URL
+            ], 201);
+        } catch (Exception $e) {
+            Log::error('Contract upload error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'An error occurred while uploading the contract.',
                 'error' => $e->getMessage(),
             ], 500);
         }
