@@ -130,6 +130,9 @@ Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::delete('/admin/client-records/{caseId}', [ClientRecordController::class, 'deleteClientRecord']);
     Route::delete('/admin/additional-qualification/{caseId}', [AchievementController::class, 'destroy']);
     Route::delete('/admin/background-information/{caseId}', [BackgroundInformationController::class, 'destroy']);
+    Route::get('/admin/users', [AuthController::class, 'listUsers']);
+    Route::delete('/admin/users/{user_id}', [AuthController::class, 'deleteUserAsAdmin']);
+    Route::patch('/admin/users/{user_id}', [AuthController::class, 'updateUserAsAdmin']);
 });
 
 // case middle
@@ -149,7 +152,7 @@ Route::prefix('cases/{caseId}')->group(function () {
 
 Route::post('password/forgot', [AuthController::class, 'forgotPassword']);
 Route::post('password/reset', [AuthController::class, 'resetPassword']);
-Route::post('/register', [AuthController::class, 'register']);
+// Route::post('/register', [AuthController::class, 'register']);
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();

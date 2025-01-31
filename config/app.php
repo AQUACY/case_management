@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Green Path Case Manager API'),
 
     /*
     |--------------------------------------------------------------------------
@@ -94,6 +94,7 @@ return [
     | are secure. You should do this prior to deploying the application.
     |
     */
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:9000'),
 
     'cipher' => 'AES-256-CBC',
 

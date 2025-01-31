@@ -67,10 +67,17 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->roles->contains('name', $roleName);
     }
-        public function assignedCases()
+
+    public function assignedCases()
     {
         return $this->hasMany(Cases::class, 'case_manager_id');
     }
+
+    public function cases()
+    {
+        return $this->hasMany(Cases::class);
+    }
+
     protected $casts = [
         'subscribed_to_announcements' => 'boolean',
     ];
