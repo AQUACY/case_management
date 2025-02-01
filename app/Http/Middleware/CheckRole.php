@@ -23,7 +23,7 @@ class CheckRole
         // Get user's role from the roles table
         $userRole = Role::find($user->role_id);
 
-        if (!$userRole || strtolower($userRole->name) !== strtolower($role)) {
+        if (!$userRole || $userRole->name !== $role) {
             return response()->json([
                 'error' => 'Forbidden - Insufficient permissions',
                 'required_role' => $role,

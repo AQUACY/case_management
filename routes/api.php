@@ -19,6 +19,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Broadcast;
 
+
 // Move this route outside of any groups and add cors middleware
 Route::middleware(['api', 'cors'])->post('/broadcasting/auth', function (Request $request) {
     return Broadcast::auth($request);
@@ -110,33 +111,8 @@ Route::get('/messages/categories', [MessageController::class, 'getMessageCategor
     Route::post('/messages/{messageId}/read', [MessageController::class, 'markAsRead']);
 });
 
-
-// case middle
-Route::prefix('cases/{caseId}')->group(function () {
-    Route::post('/profile', [CaseProfileController::class, 'store']); // Add/Update case profile
-    Route::get('/profile', [CaseProfileController::class, 'show']);  // Retrieve case profile
-    Route::post('/recommenders', [RecommenderController::class, 'store']); // Add a new recommender
-    Route::get('/recommenders', [RecommenderController::class, 'index']); // List recommenders for a case
-    Route::patch('/recommenders/{id}', [RecommenderController::class, 'update']); // Update a recommender
-    Route::post('/recommenders/bulk', [RecommenderController::class, 'addBulkRecommenders']);
-    Route::post('/documents/upload', [DocumentController::class, 'upload']);
-    Route::get('/documents', [DocumentController::class, 'viewDocuments']);
-    Route::delete('/documents/{documentId}', [DocumentController::class, 'deleteDocument']);
-    Route::get('/documents/{documentId}/download', [DocumentController::class, 'downloadDocument']);
-    Route::get('/messages', [MessageController::class, 'getMessagesByCaseId']);
-});
-
-Route::post('password/forgot', [AuthController::class, 'forgotPassword']);
-Route::post('password/reset', [AuthController::class, 'resetPassword']);
-// Route::post('/register', [AuthController::class, 'register']);
-
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-
-// })->middleware('auth:sanctum');
-
-// Administrator routes
-Route::middleware(['auth:sanctum', 'role:administrator'])->group(function () {
+// admin middle ware
+Route::middleware(['auth:api'])->group(function () {
     Route::post('/admin/register', [AuthController::class, 'register']);
     Route::post('/admin/createcase', [CaseManagerController::class, 'store']);
     Route::patch('/admin/updatecase/{id}', [CaseManagerController::class, 'update']);
@@ -165,4 +141,28 @@ Route::middleware(['auth:sanctum', 'role:administrator'])->group(function () {
     Route::delete('/admin/users/{user_id}', [AuthController::class, 'deleteUserAsAdmin']);
     Route::patch('/admin/users/{user_id}', [AuthController::class, 'updateUserAsAdmin']);
 });
+
+// case middle
+Route::prefix('cases/{caseId}')->group(function () {
+    Route::post('/profile', [CaseProfileController::class, 'store']); // Add/Update case profile
+    Route::get('/profile', [CaseProfileController::class, 'show']);  // Retrieve case profile
+    Route::post('/recommenders', [RecommenderController::class, 'store']); // Add a new recommender
+    Route::get('/recommenders', [RecommenderController::class, 'index']); // List recommenders for a case
+    Route::patch('/recommenders/{id}', [RecommenderController::class, 'update']); // Update a recommender
+    Route::post('/recommenders/bulk', [RecommenderController::class, 'addBulkRecommenders']);
+    Route::post('/documents/upload', [DocumentController::class, 'upload']);
+    Route::get('/documents', [DocumentController::class, 'viewDocuments']);
+    Route::delete('/documents/{documentId}', [DocumentController::class, 'deleteDocument']);
+    Route::get('/documents/{documentId}/download', [DocumentController::class, 'downloadDocument']);
+    Route::get('/messages', [MessageController::class, 'getMessagesByCaseId']);
+});
+
+Route::post('password/forgot', [AuthController::class, 'forgotPassword']);
+Route::post('password/reset', [AuthController::class, 'resetPassword']);
+// Route::post('/register', [AuthController::class, 'register']);
+
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+
+// })->middleware('auth:sanctum');
 
