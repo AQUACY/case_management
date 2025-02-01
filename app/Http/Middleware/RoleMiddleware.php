@@ -17,7 +17,7 @@ class RoleMiddleware
         $userRoles = Auth::user()->roles->pluck('id')->toArray();
 
         // Check if the role matches
-        if (($role === 'administrator' && !in_array(2, $userRoles))) {
+        if (($role === 'Administrator' && !in_array(2, $userRoles))) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
