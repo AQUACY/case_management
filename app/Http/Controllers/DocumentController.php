@@ -104,6 +104,50 @@ class DocumentController extends Controller
 }
 }
 
+// delete a category
+public function deleteCategory($id)
+{
+    try{
+    $category = DocumentCategory::findOrFail($id);
+    $category->delete();
+    return response()->json(['message' => 'Category deleted successfully'], 200);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error deleting record', 'error' => $e->getMessage()], 500);
+}
+}
+
+// update a category
+public function updateCategory($id, Request $request)
+{
+    try{
+    $category = DocumentCategory::findOrFail($id);
+    $category->update($request->all());
+    return response()->json(['message' => 'Category updated successfully'], 200);
+}catch (Exception $e) {
+    // Log error and return response
+    return response()->json(['message' => 'Error updating record', 'error' => $e->getMessage()], 500);
+}
+}
+
+// get all document categories
+public function getAllCategories()
+{
+    try {
+        $categories = DocumentCategory::all();
+        return response()->json([
+            'success' => true,
+            'data' => $categories
+        ], 200);
+    } catch (Exception $e) {
+        return response()->json([
+            'message' => 'Error fetching categories',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
 // delete a document
 public function deleteDocument($caseId, $documentId)
 {

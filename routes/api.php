@@ -93,6 +93,7 @@ Route::group([
     // cases
     Route::get('/casemanager/viewallcase', [CaseManagerController::class, 'index']);
     Route::get('/viewcase/{caseId}', [CaseManagerController::class, 'show']);
+    Route::get('/cases/order/{orderNumber}', [CaseManagerController::class, 'showByOrderNumber']);
 
     // respond review route
     Route::post('/background-information/{caseId}/request-review', [BackgroundInformationController::class, 'requestReview']);
@@ -119,12 +120,17 @@ Route::middleware(['auth:api', 'role:administrator'])->group(function () {
     Route::get('/admin/viewcase/{caseId}', [CaseManagerController::class, 'show']);
     Route::post('/admin/update/{caseId}/contractfile', [CaseManagerController::class, 'uploadContractFile']);
     Route::post('/admin/assign-case-manager/{caseId}', [CaseManagerController::class, 'assignCaseManager']);
-    Route::post('/admin/document-categories/add', [MessageController::class, 'createMessageCategory']);
+    Route::post('/admin/document-categories/add', [DocumentController::class, 'addCategory']);
+    Route::delete('/admin/document-categories/{id}', [DocumentController::class, 'deleteCategory']);
+    Route::patch('/admin/document-categories/{id}', [DocumentController::class, 'updateCategory']);
+    Route::get('/admin/document-categories', [DocumentController::class, 'getAllCategories']);
     Route::post('/admin/announcements', [AnnouncementController::class, 'create']); // Admin-only
     Route::patch('/admin/announcements/{id}', [AnnouncementController::class, 'update']);
     Route::delete('/admin/announcements/{id}', [AnnouncementController::class, 'destroy']);
     Route::post('/admin/addmessagecategory', [MessageController::class, 'createMessageCategory']);
     Route::delete('/admin/deletemessagecategory/{id}', [MessageController::class, 'deleteMessageCategory']);
+    Route::patch('/admin/updatemessagecategory/{id}', [MessageController::class, 'updateMessageCategory']);
+    Route::get('/admin/messagecategories', [MessageController::class, 'getMessageCategories']);
     Route::delete('/admin/cases/{caseId}/publication-records', [PublicationRecordController::class, 'destroyAll']);
     Route::delete('/admin/cases/{caseId}/deleteendavorrecords', [ProposedEmploymentEndavor::class, 'delete']);
     Route::delete('/admin/client-records/{caseId}', [ClientRecordController::class, 'deleteClientRecord']);

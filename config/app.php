@@ -94,7 +94,7 @@ return [
     | are secure. You should do this prior to deploying the application.
     |
     */
-    'frontend_url' => env('FRONTEND_URL', 'http://localhost:9000'),
+    'frontend_url' => env('FRONTEND_URL', 'https://greenpathcasemanager.com'),
 
     'cipher' => 'AES-256-CBC',
 

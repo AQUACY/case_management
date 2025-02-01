@@ -55,16 +55,18 @@ public function show($id)
     ], 200);
 }
 
-// view case by userID
-public function showByUserId($userId)
+// view case by order number
+public function showByOrderNumber($orderNumber)
 {
-    // Fetch the case by user_id, including the case manager and user
-    $case = Cases::with('caseManager', 'user')->where('user_id', $userId)->first();
+    // Fetch the case by order_number, including the case manager and user
+    $case = Cases::with('caseManager', 'user')
+                ->where('order_number', $orderNumber)
+                ->first();
 
     // Check if the case exists
     if (!$case) {
         return response()->json([
-            'error' => 'Case not found for the given user ID.'
+            'error' => 'Case not found for the given order number.'
         ], 404);
     }
 
@@ -72,6 +74,28 @@ public function showByUserId($userId)
         'success' => true,
         'message' => 'Case retrieved successfully.',
         'data' => $case
+    ], 200);
+}
+
+// view case by userID
+public function showByUserId($userId)
+{
+    // Fetch all cases for the user, including the case manager and user
+    $cases = Cases::with('caseManager', 'user')
+                ->where('user_id', $userId)
+                ->get();
+
+    // Check if any cases exist
+    if ($cases->isEmpty()) {
+        return response()->json([
+            'error' => 'No cases found for the given user ID.'
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Cases retrieved successfully.',
+        'data' => $cases
     ], 200);
 }
 
