@@ -19,6 +19,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Broadcast;
 
+
 // Move this route outside of any groups and add cors middleware
 Route::middleware(['api', 'cors'])->post('/broadcasting/auth', function (Request $request) {
     return Broadcast::auth($request);
@@ -110,6 +111,36 @@ Route::get('/messages/categories', [MessageController::class, 'getMessageCategor
     Route::post('/messages/{messageId}/read', [MessageController::class, 'markAsRead']);
 });
 
+// admin middle ware
+Route::middleware(['auth:api'])->group(function () {
+    Route::post('/admin/register', [AuthController::class, 'register']);
+    Route::post('/admin/createcase', [CaseManagerController::class, 'store']);
+    Route::patch('/admin/updatecase/{id}', [CaseManagerController::class, 'update']);
+    Route::patch('/admin/archivecase/{id}', [CaseManagerController::class, 'archive']);
+    Route::get('/admin/viewallcase', [CaseManagerController::class, 'index']);
+    Route::get('/admin/viewcase/{caseId}', [CaseManagerController::class, 'show']);
+    Route::post('/admin/update/{caseId}/contractfile', [CaseManagerController::class, 'uploadContractFile']);
+    Route::post('/admin/assign-case-manager/{caseId}', [CaseManagerController::class, 'assignCaseManager']);
+    Route::post('/admin/document-categories/add', [DocumentController::class, 'addCategory']);
+    Route::delete('/admin/document-categories/{id}', [DocumentController::class, 'deleteCategory']);
+    Route::patch('/admin/document-categories/{id}', [DocumentController::class, 'updateCategory']);
+    Route::get('/admin/document-categories', [DocumentController::class, 'getAllCategories']);
+    Route::post('/admin/announcements', [AnnouncementController::class, 'create']); // Admin-only
+    Route::patch('/admin/announcements/{id}', [AnnouncementController::class, 'update']);
+    Route::delete('/admin/announcements/{id}', [AnnouncementController::class, 'destroy']);
+    Route::post('/admin/addmessagecategory', [MessageController::class, 'createMessageCategory']);
+    Route::delete('/admin/deletemessagecategory/{id}', [MessageController::class, 'deleteMessageCategory']);
+    Route::patch('/admin/updatemessagecategory/{id}', [MessageController::class, 'updateMessageCategory']);
+    Route::get('/admin/messagecategories', [MessageController::class, 'getMessageCategories']);
+    Route::delete('/admin/cases/{caseId}/publication-records', [PublicationRecordController::class, 'destroyAll']);
+    Route::delete('/admin/cases/{caseId}/deleteendavorrecords', [ProposedEmploymentEndavor::class, 'delete']);
+    Route::delete('/admin/client-records/{caseId}', [ClientRecordController::class, 'deleteClientRecord']);
+    Route::delete('/admin/additional-qualification/{caseId}', [AchievementController::class, 'destroy']);
+    Route::delete('/admin/background-information/{caseId}', [BackgroundInformationController::class, 'destroy']);
+    Route::get('/admin/users', [AuthController::class, 'listUsers']);
+    Route::delete('/admin/users/{user_id}', [AuthController::class, 'deleteUserAsAdmin']);
+    Route::patch('/admin/users/{user_id}', [AuthController::class, 'updateUserAsAdmin']);
+});
 
 // case middle
 Route::prefix('cases/{caseId}')->group(function () {
@@ -134,37 +165,4 @@ Route::post('password/reset', [AuthController::class, 'resetPassword']);
 //     return $request->user();
 
 // })->middleware('auth:sanctum');
-
-// Administrator routes
-Route::middleware(['auth:sanctum', 'role:administrator'])->group(function () {
-    Route::prefix('admin')->group(function () {
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/createcase', [CaseManagerController::class, 'store']);
-        Route::patch('/updatecase/{id}', [CaseManagerController::class, 'update']);
-        Route::patch('/archivecase/{id}', [CaseManagerController::class, 'archive']);
-        Route::get('/viewallcase', [CaseManagerController::class, 'index']);
-        Route::get('/viewcase/{caseId}', [CaseManagerController::class, 'show']);
-        Route::post('/update/{caseId}/contractfile', [CaseManagerController::class, 'uploadContractFile']);
-        Route::post('/assign-case-manager/{caseId}', [CaseManagerController::class, 'assignCaseManager']);
-        Route::post('/document-categories/add', [DocumentController::class, 'addCategory']);
-        Route::delete('/document-categories/{id}', [DocumentController::class, 'deleteCategory']);
-        Route::patch('/document-categories/{id}', [DocumentController::class, 'updateCategory']);
-        Route::get('/document-categories', [DocumentController::class, 'getAllCategories']);
-        Route::post('/announcements', [AnnouncementController::class, 'create']); // Admin-only
-        Route::patch('/announcements/{id}', [AnnouncementController::class, 'update']);
-        Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy']);
-        Route::post('/addmessagecategory', [MessageController::class, 'createMessageCategory']);
-        Route::delete('/deletemessagecategory/{id}', [MessageController::class, 'deleteMessageCategory']);
-        Route::patch('/updatemessagecategory/{id}', [MessageController::class, 'updateMessageCategory']);
-        Route::get('/messagecategories', [MessageController::class, 'getMessageCategories']);
-        Route::delete('/cases/{caseId}/publication-records', [PublicationRecordController::class, 'destroyAll']);
-        Route::delete('/cases/{caseId}/deleteendavorrecords', [ProposedEmploymentEndavor::class, 'delete']);
-        Route::delete('/client-records/{caseId}', [ClientRecordController::class, 'deleteClientRecord']);
-        Route::delete('/additional-qualification/{caseId}', [AchievementController::class, 'destroy']);
-        Route::delete('/background-information/{caseId}', [BackgroundInformationController::class, 'destroy']);
-        Route::get('/users', [AuthController::class, 'listUsers']);
-        Route::delete('/users/{user_id}', [AuthController::class, 'deleteUserAsAdmin']);
-        Route::patch('/users/{user_id}', [AuthController::class, 'updateUserAsAdmin']);
-    });
-});
 
