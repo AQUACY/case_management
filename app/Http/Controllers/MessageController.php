@@ -61,6 +61,17 @@ class MessageController extends Controller
 }
     }
 
+    public function updateMessageCategory($id, Request $request)
+    {
+        try{
+        $category = MessageCategory::findOrFail($id);
+        $category->update($request->all());
+        return response()->json(['message' => 'Category updated successfully'], 200);
+    }catch (Exception $e) {
+        return response()->json(['message' => 'Error updating record', 'error' => $e->getMessage()], 500);
+    }
+    }
+
      /**
      * Store a newly created message in storage.
      *

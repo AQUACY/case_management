@@ -15,6 +15,7 @@ use Log;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Mail\NewUserCredentials;
 
 class AuthController extends BaseController
 {
@@ -58,41 +59,69 @@ class AuthController extends BaseController
     public function register(Request $request)
     {
         try {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'role' => 'required|exists:roles,name',
-        ]);
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:8',
+                'role' => 'required|exists:roles,name',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 422);
-        }
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 422);
+            }
 
-        // Get role ID first
-        $role = Role::where('name', $request->role)->first();
+            // Prevent administrator role creation
+            if (strtolower($request->role) === 'administrator') {
+                return response()->json([
+                    'error' => 'Administrator accounts cannot be created through registration'
+                ], 403);
+            }
 
-        // Create user with role_id
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role_id' => $role->id
-        ]);
+            // Get role ID first
+            $role = Role::where('name', $request->role)->first();
 
-        // Assign role
-        $user->roles()->attach($role);
+            if (!$role) {
+                return response()->json(['error' => 'Role not found'], 404);
+            }
 
-        // Trigger guest email
-        if ($request->role === 'guest') {
-            $this->sendGuestCredentials($user, $request->password);
-        }
+            // Create user with role_id
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'role_id' => $role->id
+            ]);
 
-        return response()->json(['success' => 'User registered successfully']);
-    }catch (Exception $e) {
+            // Also attach role to pivot table
+            $user->roles()->attach($role->id);
+
+            // Send credentials email to all new users
+            try {
+                Mail::to($user->email)->send(new NewUserCredentials($user, $request->password));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send credentials email: ' . $e->getMessage());
+                // Continue execution even if email fails
+            }
+
+            // Additional guest-specific email if needed
+            if ($request->role === 'guest') {
+                $this->sendGuestCredentials($user, $request->password);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User registered successfully. Login credentials have been sent to the registered email.',
+                'user' => $user
+            ]);
+
+        } catch (Exception $e) {
             // Log error and return response
-            return response()->json(['message' => 'Error saving record', 'error' => $e->getMessage()], 500);
-    }
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving record',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 //    login function
