@@ -18,6 +18,7 @@ use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Broadcast;
+use App\Http\Controllers\CaseStatusController;
 
 
 // Move this route outside of any groups and add cors middleware
@@ -29,8 +30,17 @@ Route::group([
     'middleware' => 'api',
     'prefix' => 'auth',
 ], function($router){
-    // Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+});
+
+Route::group([
+    'middleware' => 'auth:api',
+    'prefix' => 'auth',
+], function($router){
+    // Route::post('/register', [AuthController::class, 'register']);
+    // Route::post('/login', [AuthController::class, 'login']);
     Route::put('account/update', [AuthController::class, 'updateAccount']);
     Route::put('account/password', [AuthController::class, 'updatePassword']);
     Route::delete('account/delete', [AuthController::class, 'deleteAccount']);
@@ -109,6 +119,13 @@ Route::get('/messages/categories', [MessageController::class, 'getMessageCategor
 
     // Add this new route
     Route::post('/messages/{messageId}/read', [MessageController::class, 'markAsRead']);
+
+    // case status routes
+    Route::get('/case/{caseId}/statuses', [CaseStatusController::class, 'index']); // Get all statuses for a case
+    Route::post('/case/statuses', [CaseStatusController::class, 'store']); // Create a case status
+    Route::get('/case/statuses/{id}', [CaseStatusController::class, 'show']); // Show a specific status
+    Route::put('/case/statuses/{id}', [CaseStatusController::class, 'update']); // Update a status
+    Route::delete('/case/statuses/{id}', [CaseStatusController::class, 'destroy']); // Delete a status
 });
 
 // admin middle ware
@@ -143,7 +160,7 @@ Route::middleware(['auth:api'])->group(function () {
 });
 
 // case middle
-Route::prefix('cases/{caseId}')->group(function () {
+Route::middleware(['auth:api'])->prefix('cases/{caseId}')->group(function () {
     Route::post('/profile', [CaseProfileController::class, 'store']); // Add/Update case profile
     Route::get('/profile', [CaseProfileController::class, 'show']);  // Retrieve case profile
     Route::post('/recommenders', [RecommenderController::class, 'store']); // Add a new recommender
