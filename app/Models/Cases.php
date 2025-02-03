@@ -37,6 +37,7 @@ class Cases extends Model
     {
         return $this->hasMany(Message::class);  // Define the one-to-many relationship
     }
+    
 
 }
 
