@@ -14,7 +14,7 @@ class PublicationRecordController extends Controller
     {
         try{
         $validatedData = $request->validate([
-            'peer_reviewed_journal_articles' => 'nullable|integer|min:0',
+            'peer_reviewed_journal_articless' => 'nullable|integer|min:0',
             'notes_peer_reviewed_journal' => 'nullable|string',
             'peer_reviewed_conference_articles' => 'nullable|integer|min:0',
             'notes_peer_reviewed_conference' => 'nullable|string',
@@ -35,6 +35,13 @@ class PublicationRecordController extends Controller
             'research_topic' => 'nullable|string',
             'significance' => 'nullable|string',
             'funding_sources' => 'nullable|string',
+            'citation_database_link' => 'nullable|string',
+            'editor_role' => 'nullable|string',
+            'editor_journals' => 'nullable|string',
+            'number_of_peer_reviews' => 'nullable|integer|min:0',
+            'served_on_phd_dissertation_committee' => 'nullable|string',
+            'performed_grant_application_for_government_agencies' => 'nullable|string',
+            'grant_application_agency' => 'nullable|string',
         ]);
 
         $publicationRecord = PublicationRecord::updateOrCreate(

@@ -64,6 +64,13 @@ return new class extends Migration
             $table->string('social_media_source')->nullable();
             $table->boolean('has_dependents')->nullable();
             $table->enum('marital_status', ['married', 'single'])->nullable();
+            $table->string('peer_review_journal')->nullable();
+            $table->string('citation_database_link')->nullable();
+            $table->enum('editor_role', ['Yes', 'No'])->nullable();
+            $table->json('editor_journals')->nullable()->comment('Array of journal names and number of reviews when editor_role is Yes');
+            $table->enum('served_on_phd_dissertation_committee', ['Yes', 'No'])->nullable();
+            $table->enum('grant_application_review', ['Yes', 'No'])->nullable();
+            $table->string('agency_name')->nullable();
             $table->timestamps();
 
             // Foreign key constraint

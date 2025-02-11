@@ -32,6 +32,13 @@ class PublicationRecord extends Model
         'research_topic',
         'significance',
         'funding_sources',
+        'citation_database_link',
+        'editor_role',
+        'editor_journals',
+        'number_of_peer_reviews',
+        'served_on_phd_dissertation_committee',
+        'performed_grant_application_for_government_agencies',
+        'grant_application_agency',
     ];
 
     public function case()

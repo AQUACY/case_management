@@ -19,7 +19,16 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\CaseStatusController;
-
+use App\Http\Controllers\CaseEducationController;
+use App\Http\Controllers\CaseWorkExperienceController;
+use App\Http\Controllers\CaseResearchSummaryController;
+use App\Http\Controllers\ExtraordinaryAbilityController;
+use App\Http\Controllers\AwardController;
+use App\Http\Controllers\MembershipController;
+use App\Http\Controllers\MediaCoverageController;
+use App\Http\Controllers\SpeakingEngagementController;
+use App\Http\Controllers\LeadershipRoleController;
+use App\Http\Controllers\PersonalStatementController;
 
 // Move this route outside of any groups and add cors middleware
 Route::middleware(['api', 'cors'])->post('/broadcasting/auth', function (Request $request) {
@@ -126,6 +135,66 @@ Route::get('/messages/categories', [MessageController::class, 'getMessageCategor
     Route::get('/case/statuses/{id}', [CaseStatusController::class, 'show']); // Show a specific status
     Route::put('/case/statuses/{id}', [CaseStatusController::class, 'update']); // Update a status
     Route::delete('/case/statuses/{id}', [CaseStatusController::class, 'destroy']); // Delete a status
+
+        // Case Education Routes
+    Route::get('/cases/{caseId}/education', [CaseEducationController::class, 'index']);
+    Route::post('/cases/education', [CaseEducationController::class, 'store']);
+    Route::patch('/cases/education/{id}', [CaseEducationController::class, 'update']);
+    Route::delete('/cases/education/{id}', [CaseEducationController::class, 'destroy']);
+
+    // Case Work Experience Routes
+    Route::get('/cases/{caseId}/work-experience', [CaseWorkExperienceController::class, 'index']);
+    Route::post('/cases/work-experience', [CaseWorkExperienceController::class, 'store']);
+    Route::patch('/cases/work-experience/{id}', [CaseWorkExperienceController::class, 'update']);
+    Route::delete('/cases/work-experience/{id}', [CaseWorkExperienceController::class, 'destroy']);
+
+    // Case Research Summary Routes
+    Route::get('/cases/{caseId}/research-summary', [CaseResearchSummaryController::class, 'show']);
+    Route::post('/cases/research-summary', [CaseResearchSummaryController::class, 'store']);
+    Route::patch('/cases/{caseId}/research-summary', [CaseResearchSummaryController::class, 'update']);
+    Route::delete('/cases/{caseId}/research-summary', [CaseResearchSummaryController::class, 'destroy']);
+
+    // Extraordinary Ability Routes
+    Route::get('/cases/{caseId}/extraordinary-ability', [ExtraordinaryAbilityController::class, 'show']);
+    Route::post('/cases/extraordinary-ability', [ExtraordinaryAbilityController::class, 'store']);
+    Route::patch('/cases/{caseId}/extraordinary-ability', [ExtraordinaryAbilityController::class, 'update']);
+    Route::delete('/cases/{caseId}/extraordinary-ability', [ExtraordinaryAbilityController::class, 'destroy']);
+
+    // Awards
+    Route::get('/cases/{caseId}/awards', [AwardController::class, 'index']);
+    Route::post('/cases/awards', [AwardController::class, 'store']);
+    Route::patch('/cases/awards/{id}', [AwardController::class, 'update']);
+    Route::delete('/cases/awards/{id}', [AwardController::class, 'destroy']);
+
+    // Memberships
+    Route::get('/cases/{caseId}/memberships', [MembershipController::class, 'index']);
+    Route::post('/cases/memberships', [MembershipController::class, 'store']);
+    Route::patch('/cases/memberships/{id}', [MembershipController::class, 'update']);
+    Route::delete('/cases/memberships/{id}', [MembershipController::class, 'destroy']);
+
+    // Media Coverage
+    Route::get('/cases/{caseId}/media-coverage', [MediaCoverageController::class, 'index']);
+    Route::post('/cases/media-coverage', [MediaCoverageController::class, 'store']);
+    Route::patch('/cases/media-coverage/{id}', [MediaCoverageController::class, 'update']);
+    Route::delete('/cases/media-coverage/{id}', [MediaCoverageController::class, 'destroy']);
+
+    // Speaking Engagements
+    Route::get('/cases/{caseId}/speaking-engagements', [SpeakingEngagementController::class, 'index']);
+    Route::post('/cases/speaking-engagements', [SpeakingEngagementController::class, 'store']);
+    Route::patch('/cases/speaking-engagements/{id}', [SpeakingEngagementController::class, 'update']);
+    Route::delete('/cases/speaking-engagements/{id}', [SpeakingEngagementController::class, 'destroy']);
+
+    // Leadership Roles
+    Route::get('/cases/{caseId}/leadership-roles', [LeadershipRoleController::class, 'index']);
+    Route::post('/cases/leadership-roles', [LeadershipRoleController::class, 'store']);
+    Route::patch('/cases/leadership-roles/{id}', [LeadershipRoleController::class, 'update']);
+    Route::delete('/cases/leadership-roles/{id}', [LeadershipRoleController::class, 'destroy']);
+
+    // personal statement
+    Route::get('/cases/{caseId}/personal-statement', [PersonalStatementController::class, 'show']);
+    Route::post('/cases/personal-statement', [PersonalStatementController::class, 'store']);
+    Route::patch('/cases/{caseId}/personal-statement', [PersonalStatementController::class, 'update']);
+    Route::delete('/cases/{caseId}/personal-statement', [PersonalStatementController::class, 'destroy']);
 });
 
 // admin middle ware
@@ -172,6 +241,7 @@ Route::middleware(['auth:api'])->prefix('cases/{caseId}')->group(function () {
     Route::delete('/documents/{documentId}', [DocumentController::class, 'deleteDocument']);
     Route::get('/documents/{documentId}/download', [DocumentController::class, 'downloadDocument']);
     Route::get('/messages', [MessageController::class, 'getMessagesByCaseId']);
+
 });
 
 Route::post('password/forgot', [AuthController::class, 'forgotPassword']);

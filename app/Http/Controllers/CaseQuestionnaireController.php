@@ -70,107 +70,149 @@ public function store(Request $request, $caseId)
     try {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
-             'case_id' => 'required|exists:cases,id',
-            'petition_type' => 'nullable|in:EB-1A,EB-1B,EB-2 NIW',
-            'petitioner' => 'nullable|in:Employer,Self',
+            'case_id' => 'required|exists:cases,id',
+
+            // basic information
+            'petition_type' => 'nullable|string|max:255',
+            'petitioner' => 'nullable|string|max:255',
+
+            // personal information
             'family_name' => 'nullable|string|max:255',
             'given_name' => 'nullable|string|max:255',
             'full_middle_name' => 'nullable|string|max:255',
-            'uses_roman_alphabet' => 'nullable|boolean',
+            'native_alphabet' => 'nullable|string|max:255',
+            'dob' => 'nullable|date',
+            'city_town_village_of_birth' => 'nullable|string|max:255',
+            'state_of_birth' => 'nullable|string|max:255',
+            'country_of_birth' => 'nullable|string|max:255',
+            'nationality' => 'nullable|string|max:255',
+            'alien_registration_number' => 'nullable|string|max:255',
+            'ssn' => 'nullable|string|max:255',
+
+            // mail address
             'street_number_name' => 'nullable|string|max:255',
-            'street_type' => 'nullable|in:None,Apt,Ste,Flr',
-            'city' => 'nullable|string|max:255',
+            'type' => 'nullable|string|max:255',
+            'type_detail' => 'nullable|string|max:255',
+            'city_town' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
-            'zip_code' => 'nullable|string|max:10',
+            'zip_code' => 'nullable|string|max:255',
             'province' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
-            'dob' => 'nullable|date',
-            'birth_city' => 'nullable|string|max:255',
-            'birth_state' => 'nullable|string|max:255',
-            'birth_country' => 'nullable|string|max:255',
-            'citizenship_country' => 'nullable|string|max:255',
-            'dual_citizenship' => 'nullable|in:Yes,No',
-            'secondary_country' => 'nullable|string|max:255',
-            'social_security_number' => 'nullable|string|max:15',
-            'alien_registration_number' => 'nullable|string|max:15',
-            'arrival_date' => 'nullable|date',
-            'i94_record_number' => 'nullable|string|max:20',
-            'passport_number' => 'nullable|string|max:20',
-            'passport_country' => 'nullable|string|max:255',
-            'passport_expiration_date' => 'nullable|date',
-            'admission_class' => 'nullable|string|max:10',
-            'admit_until_date' => 'nullable|date',
-            'occupation' => 'nullable|string|max:255',
-            'annual_income' => 'nullable|numeric|min:0',
-            'job_title' => 'nullable|string|max:255',
-            'soc_code' => 'nullable|string|max:10',
-            'job_description' => 'nullable|string',
-            'is_full_time' => 'nullable|boolean',
-            'hours_per_week' => 'nullable|integer|min:1|max:168',
-            'is_permanent_position' => 'nullable|boolean',
-            'is_new_position' => 'nullable|boolean',
-            'wages' => 'nullable|numeric|min:0',
-            'pay_period' => 'nullable|in:hour,week,month,year',
-            'worksite_location_type' => 'nullable|in:Business premises,Employer\'s private household,Own private residence,Multiple locations',
-            'worksite_street' => 'nullable|string|max:255',
-            'worksite_street_type' => 'nullable|in:None,Apt,Ste,Flr',
-            'worksite_city' => 'nullable|string|max:255',
-            'worksite_state' => 'nullable|string|max:255',
-            'worksite_county' => 'nullable|string|max:255',
-            'worksite_zip_code' => 'nullable|string|max:10',
-            'apply_for_immigrant_visa' => 'nullable|boolean',
-            'processing_country' => 'nullable|string|max:255',
-            'processing_city' => 'nullable|string|max:255',
-            'file_i485' => 'nullable|boolean',
-            'current_residence_country' => 'nullable|string|max:255',
-            'foreign_street' => 'nullable|string|max:255',
-            'foreign_street_type' => 'nullable|in:None,Apt,Ste,Flr',
-            'foreign_city' => 'nullable|string|max:255',
-            'foreign_state' => 'nullable|string|max:255',
-            'foreign_province' => 'nullable|string|max:255',
-            'foreign_postal_code' => 'nullable|string|max:10',
+            'mobile_telephone' => 'nullable|string|max:255',
+            'email_address' => 'nullable|email|max:255',
+
+            // information about last arrival
+            'last_arrival_date' => 'nullable|date',
+            'i_94_arrival_record_number' => 'nullable|string|max:255',
+            'expiration_date' => 'nullable|date',
+            'status_on_form_i_94' => 'nullable|string|max:255',
+            'passport_number' => 'nullable|string|max:255',
+            'travel_document_number' => 'nullable|string|max:255',
+            'country_of_issuance' => 'nullable|string|max:255',
+            'expiration_date_for_passport' => 'nullable|date',
+
+            // visa processing
+            'alien_will_apply_for_visa_abroad' => 'nullable|boolean',
+            'visa_processing_city_town' => 'nullable|string|max:255',
+            'visa_processing_country' => 'nullable|string|max:255',
+            'alien_in_us' => 'nullable|boolean',
+            'if_now_in_the_us' => 'nullable|string|max:255',
+            'foreign_street_number_name' => 'nullable|string|max:255',
+            'foreign_address_type' => 'nullable|string|max:255',
+            'foreign_city_town' => 'nullable|string|max:255',
+            'foreign_state_province' => 'nullable|string|max:255',
+            'foreign_postal_code' => 'nullable|string|max:255',
             'foreign_country' => 'nullable|string|max:255',
-            'simultaneous_petitions' => 'nullable|boolean',
-            'simultaneous_petitions_details' => 'nullable|string',
-            'previous_visa_petitions' => 'nullable|boolean',
-            'previous_visa_petitions_details' => 'nullable|string',
-            'in_removal_proceedings' => 'nullable|boolean',
-            'removal_proceedings_details' => 'nullable|string',
-            'daytime_phone' => 'nullable|string|max:15',
-            'mobile_phone' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:255',
-             // Family rules
-             'family_members.*.id' => 'nullable|exists:family_members,id',
-             'family_members.*.family_name' => 'required|string|max:255',
-             'family_members.*.given_name' => 'required|string|max:255',
-             'family_members.*.relationship' => 'required|in:Spouse,Child',
-             'family_members.*.dob' => 'required|date',
-             'family_members.*.birth_country' => 'required|string|max:255',
+
+            // employment information
+            'current_employer_name' => 'nullable|string|max:255',
+            'job_title' => 'nullable|string|max:255',
+            'full_time_position' => 'nullable|boolean',
+            'permanent_position' => 'nullable|boolean',
+            'occupation' => 'nullable|string|max:255',
+            'annual_income' => 'nullable|numeric',
+            'soc_code' => 'nullable|string|max:255',
+            'nontechnical_job_description' => 'nullable|string',
+            'hours_per_week' => 'nullable|integer',
+            'new_position' => 'nullable|boolean',
+            'wages' => 'nullable|numeric',
+            'wages_per' => 'nullable|string|max:255',
+            'worksite_type' => 'nullable|string|max:255',
+            'worksite_street_number_name' => 'nullable|string|max:255',
+            'work_building_type' => 'nullable|string|max:255',
+            'work_site_additional_details' => 'nullable|string',
+            'work_city_town' => 'nullable|string|max:255',
+            'work_state' => 'nullable|string|max:255',
+            'work_county_township' => 'nullable|string|max:255',
+            'work_zip_code' => 'nullable|string|max:255',
+
+            // Updated Family member validation rules
+            'family_members' => 'nullable|array',
+            'family_members.*.id' => 'nullable|exists:family_members,id',
+            'family_members.*.family_name_last_name' => 'required_with:family_members|string|max:255',
+            'family_members.*.given_name_first_name' => 'required_with:family_members|string|max:255',
+            'family_members.*.relationship' => 'required_with:family_members|string|in:Spouse,Child',
+            'family_members.*.dob' => 'required_with:family_members|date',
+            'family_members.*.birth_country' => 'required_with:family_members|string|max:255'
         ]);
+
+        // Define boolean fields
+        $booleanFields = [
+            'alien_will_apply_for_visa_abroad',
+            'alien_in_us',
+            'full_time_position',
+            'permanent_position',
+            'new_position'
+        ];
+
+        // Convert boolean values explicitly
+        foreach ($booleanFields as $field) {
+            if (isset($validatedData[$field])) {
+                $validatedData[$field] = filter_var($validatedData[$field], FILTER_VALIDATE_BOOLEAN);
+            }
+        }
 
         $caseQuestionnaire = CaseQuestionnaire::where('case_id', $caseId)->first();
 
         if ($caseQuestionnaire) {
             // Update existing case questionnaire
-            $caseQuestionnaire->update($request->except('family_members'));
+            $updateData = $request->except('family_members');
+
+            // Convert boolean values in update data
+            foreach ($booleanFields as $field) {
+                if (isset($updateData[$field])) {
+                    $updateData[$field] = filter_var($updateData[$field], FILTER_VALIDATE_BOOLEAN);
+                }
+            }
+
+            $caseQuestionnaire->update($updateData);
 
             // Update or create family members
             if ($request->has('family_members')) {
                 foreach ($request->family_members as $familyMemberData) {
+                    // Updated field names in the creation array
+                    $newFamilyMember = [
+                        'case_questionnaire_id' => $caseQuestionnaire->id,
+                        'family_name_last_name' => $familyMemberData['family_name_last_name'] ?? null,
+                        'given_name_first_name' => $familyMemberData['given_name_first_name'] ?? null,
+                        'relationship' => $familyMemberData['relationship'] ?? null,
+                        'dob' => $familyMemberData['dob'] ?? null,
+                        'birth_country' => $familyMemberData['birth_country'] ?? null
+                    ];
+
                     if (isset($familyMemberData['id'])) {
-                        // Update existing family member
                         $familyMember = $caseQuestionnaire->familyMembers()->find($familyMemberData['id']);
                         if ($familyMember) {
-                            $familyMember->update($familyMemberData);
+                            $familyMember->update($newFamilyMember);
                         }
                     } else {
-                        // Create new family member
-                        $caseQuestionnaire->familyMembers()->create($familyMemberData);
+                        $caseQuestionnaire->familyMembers()->create($newFamilyMember);
                     }
                 }
             }
 
             return response()->json([
+                'success' => true,
                 'message' => 'Case Questionnaire updated successfully',
                 'data' => $caseQuestionnaire->load('familyMembers')
             ]);
@@ -189,13 +231,14 @@ public function store(Request $request, $caseId)
             }
 
             return response()->json([
+                'success' => true,
                 'message' => 'Case Questionnaire created successfully',
                 'data' => $caseQuestionnaire->load('familyMembers')
             ]);
         }
     } catch (Exception $e) {
-        // Handle any errors
         return response()->json([
+            'success' => false,
             'message' => 'Error updating Case Questionnaire',
             'error' => $e->getMessage()
         ], 500);

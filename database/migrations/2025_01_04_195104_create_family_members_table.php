@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('family_members', function (Blueprint $table) {
             $table->id();
             $table->foreignId('case_questionnaire_id')->constrained()->onDelete('cascade');
-            $table->string('family_name');
-            $table->string('given_name');
-            $table->string('full_middle_name')->nullable();
-            $table->enum('relationship', ['Spouse', 'Child']);
+            $table->string('family_name_last_name');
+            $table->string('given_name_first_name');
+            $table->string('middle_name')->nullable();
             $table->date('dob');
             $table->string('birth_country');
+            $table->enum('relationship', ['Spouse', 'Child']);
             $table->enum('adjustment_status', ['Yes', 'No']);
-            $table->enum('immigrant_visa', ['Yes', 'No']);
+            $table->enum('visa_abroad', ['Yes', 'No']);
             $table->timestamps();
         });
     }
