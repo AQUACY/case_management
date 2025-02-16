@@ -11,14 +11,14 @@ class FamilyMember extends Model
 
     protected $fillable = [
         'case_questionnaire_id',
-        'family_name',
-        'given_name',
-        'full_middle_name',
-        'relationship',
+        'family_name_last_name',
+        'given_name_first_name',
+        'middle_name',
         'dob',
         'birth_country',
+        'relationship',
         'adjustment_status',
-        'immigrant_visa',
+        'visa_abroad',
     ];
 
     public function caseQuestionnaire()

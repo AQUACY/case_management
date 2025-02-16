@@ -35,6 +35,13 @@ return new class extends Migration
             $table->longText('research_topic')->nullable();
             $table->longText('significance')->nullable();
             $table->longText('funding_sources')->nullable();
+            $table->text('citation_database_link')->nullable();
+            $table->enum('editor_role', ['yes', 'no'])->nullable();
+            $table->longText('editor_journals')->nullable(); // List of journals where served as editor
+            $table->integer('number_of_peer_reviews')->nullable(); // Total number of peer reviews performed
+            $table->enum('served_on_phd_dissertation_committee', ['yes', 'no'])->nullable();
+            $table->enum('performed_grant_application_for_government_agencies', ['yes', 'no'])->nullable();
+            $table->string('grant_application_agency')->nullable(); // Name of agency if performed grant application
             $table->timestamps();
         });
     }

@@ -21,7 +21,9 @@ class ClientRecord extends Model
         'asylum_applied', 'street_address', 'address_line_2', 'city',
         'state', 'zip_code', 'country', 'email', 'phone_number',
         'referral_source', 'social_media_source', 'has_dependents',
-        'marital_status'
+        'marital_status', 'peer_review_journal', 'citation_database_link',
+        'editor_role', 'editor_journals', 'served_on_phd_dissertation_committee',
+        'grant_application_review', 'agency_name'
     ];
 
     public function dependents()
