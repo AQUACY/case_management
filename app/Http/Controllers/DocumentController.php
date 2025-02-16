@@ -79,6 +79,102 @@ class DocumentController extends Controller
         }
     }
 
+    // get onboarding form
+    public function getOnboardingForm($filename)
+    {
+        try {
+            $path = public_path('storage/onboardingforms/' . $filename);
+
+            if (!file_exists($path)) {
+                return response()->json(['message' => 'File not found'], 404);
+            }
+
+            // Set the content type based on file extension
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            $contentType = $this->getContentType($extension);
+
+            return response()->file($path, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                // Disable authentication prompt
+                'WWW-Authenticate' => '',
+                // Allow cross-origin requests
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS'
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Error retrieving file', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+public function sampleDocuments($folder)
+{
+    try {
+        $path = public_path('storage/sampledocuments/' . $folder);
+
+        if (!file_exists($path)) {
+            return response()->json(['message' => 'Folder not found'], 404);
+        }
+
+        $files = glob($path . '/*');
+        $files = array_map(function($file) {
+            return basename($file);
+        }, $files);
+
+        return response()->json(['files' => $files], 200);
+    } catch (Exception $e) {
+        return response()->json(['message' => 'Error retrieving files', 'error' => $e->getMessage()], 500);
+    }
+}
+
+    public function downloadSampleDocument($folder, $filename)
+    {
+        try {
+            $path = public_path('storage/sampledocuments/' . $folder . '/' . $filename);
+
+            if (!file_exists($path)) {
+                return response()->json(['message' => 'File not found'], 404);
+            }
+
+            // Set the content type based on file extension
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            $contentType = $this->getContentType($extension);
+
+            return response()->file($path, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                // Disable authentication prompt
+                'WWW-Authenticate' => '',
+                // Allow cross-origin requests
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS'
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving file',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    private function getContentType($extension)
+    {
+        $contentTypes = [
+            'pdf'  => 'application/pdf',
+            'doc'  => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls'  => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg'
+        ];
+
+        return $contentTypes[strtolower($extension)] ?? 'application/octet-stream';
+    }
 
     // add category
     public function addCategory(Request $request)

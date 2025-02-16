@@ -195,7 +195,33 @@ Route::get('/messages/categories', [MessageController::class, 'getMessageCategor
     Route::post('/cases/personal-statement', [PersonalStatementController::class, 'store']);
     Route::patch('/cases/{caseId}/personal-statement', [PersonalStatementController::class, 'update']);
     Route::delete('/cases/{caseId}/personal-statement', [PersonalStatementController::class, 'destroy']);
+
+    // onboarding form
+    // Route::get('/onboarding-form/{filename}', [DocumentController::class, 'getOnboardingForm']);
+
+    // Make the route publicly accessible without auth middleware
+
 });
+Route::get('onboarding-form/{filename}', [DocumentController::class, 'getOnboardingForm'])
+->name('onboarding-form.get')
+->withoutMiddleware(['auth']); // Remove auth middleware for this route
+
+Route::get('sample-documents/{folder}', [DocumentController::class, 'sampleDocuments'])
+->name('sample-documents.get')
+->withoutMiddleware(['auth']); // Remove auth middleware for this route
+
+Route::options('download-sample-document/{folder}/{filename}', function() {
+    return response('', 200)
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Authorization, X-Request-With');
+});
+
+Route::get('download-sample-document/{folder}/{filename}', [DocumentController::class, 'downloadSampleDocument'])
+    ->name('download-sample-document.download')
+    ->withoutMiddleware(['auth']);
+
+
 
 // admin middle ware
 Route::middleware(['auth:api'])->group(function () {
@@ -252,4 +278,5 @@ Route::post('password/reset', [AuthController::class, 'resetPassword']);
 //     return $request->user();
 
 // })->middleware('auth:sanctum');
+
 
