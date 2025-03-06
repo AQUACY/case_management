@@ -104,7 +104,7 @@ class AuthController extends BaseController
             }
 
             // Additional guest-specific email if needed
-            if ($request->role === 'guest') {
+            if ($request->role === 'client') {
                 $this->sendGuestCredentials($user, $request->password);
             }
 

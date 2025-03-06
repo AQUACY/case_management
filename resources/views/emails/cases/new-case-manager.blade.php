@@ -1,4 +1,6 @@
 @component('mail::message')
+<img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }} Logo" style="max-width: 200px; margin-bottom: 20px;">
+
 # New Case Assigned
 
 Dear {{ $caseManager->name }},
@@ -16,6 +18,6 @@ A new case has been assigned to you with the following details:
 **Case Description:**
 {{ $case->description }}
 
-Best regards,
-{{ config('app.name') }}
-@endcomponent 
+Best regards,<br/>
+Admin {{ config('app.name') }}
+@endcomponent

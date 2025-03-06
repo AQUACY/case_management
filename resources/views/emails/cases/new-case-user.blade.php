@@ -1,4 +1,6 @@
 @component('mail::message')
+<img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }} Logo" style="max-width: 200px; margin-bottom: 20px;">
+
 # New Case Created
 
 Dear {{ $case->user->name }},
@@ -19,6 +21,6 @@ You can access your case by logging in to our platform:
 Login to Platform
 @endcomponent
 
-Best regards,
-{{ config('app.name') }}
-@endcomponent 
+Best regards,<br/>
+Admin {{ config('app.name') }}
+@endcomponent

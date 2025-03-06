@@ -1,12 +1,13 @@
 @component('mail::message')
+<img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }} Logo" style="max-width: 200px; margin-bottom: 20px;">
 # Case Contract Uploaded
 
 Dear {{ $isUser ? $case->user->name : $case->caseManager->name }},
 
-The contract for case {{ $case->order_number }} has been uploaded.
+The contract for your case <span class="case-number text-bold">( {{ $case->order_number }} )</span> has been uploaded.
 
-The contract file is attached to this email for your records.
+We have also attached it to this email for your records.
 
 Best regards,
-{{ config('app.name') }}
-@endcomponent 
+Admin {{ config('app.name') }}
+@endcomponent
