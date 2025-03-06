@@ -36,6 +36,11 @@ class CaseEducationController extends Controller
                 'case_id' => 'required|exists:cases,id',
                 'university_name' => 'required|string|max:255',
                 'completion_year' => 'required|digits:4|integer|min:1900|max:'.(date('Y')+10),
+                'location' => 'required|string|max:255',
+                'degree_type' => 'required|string|max:255',
+                'degree_majors' => 'nullable|string|max:255',
+                'degree_minors' => 'nullable|string|max:255',
+                'start_year' => 'required|integer|min:1900|max:'.(date('Y')+10),
             ]);
 
             $education = CaseEducation::create($validatedData);
@@ -62,6 +67,11 @@ class CaseEducationController extends Controller
             $validatedData = $request->validate([
                 'university_name' => 'sometimes|string|max:255',
                 'completion_year' => 'sometimes|digits:4|integer|min:1900|max:'.(date('Y')+10),
+                'location' => 'sometimes|string|max:255',
+                'degree_type' => 'sometimes|string|max:255',
+                'degree_majors' => 'nullable|string|max:255',
+                'degree_minors' => 'nullable|string|max:255',
+                'start_year' => 'sometimes|integer|min:1900|max:'.(date('Y')+10),
             ]);
 
             $education->update($validatedData);

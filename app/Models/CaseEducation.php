@@ -11,7 +11,12 @@ class CaseEducation extends Model
     protected $fillable = [
         'case_id',
         'university_name',
-        'completion_year'
+        'completion_year',
+        'location',
+        'degree_type',
+        'degree_majors',
+        'degree_minors',
+        'start_year'
     ];
 
     public function case()
