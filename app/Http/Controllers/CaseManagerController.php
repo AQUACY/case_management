@@ -13,6 +13,7 @@ use Exception;
 use App\Mail\CaseContractUploadNotification;
 use App\Mail\NewCaseManagerNotification;
 use App\Mail\NewCaseUserNotification;
+use App\Mail\CaseContractUploadNotificationCm;
 use Illuminate\Support\Facades\Mail;
 
 class CaseManagerController extends Controller
@@ -196,7 +197,7 @@ public function showByUserId($userId)
             // Send emails
             if ($case->caseManager) {
                 Mail::to($case->caseManager->email)
-                    ->send(new CaseContractUploadNotification($case, false));
+                    ->send(new CaseContractUploadNotificationCm($case, false));
             }
 
             if ($case->user) {

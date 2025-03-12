@@ -97,13 +97,13 @@ class AuthController extends BaseController
             $user->roles()->attach($role->id);
 
             // Send credentials email to all new users
-           
+
 
 
 
             // Additional guest-specific email if needed
             if (strtolower($request->role) === 'client') {
-                $this->sendGuestCredentials($user, $request->password);
+                // $this->sendGuestCredentials($user, $request->password);
                 try {
                     Mail::to($user->email)->send(new NewUserCredentials($user, $request->password));
                 } catch (\Exception $e) {
