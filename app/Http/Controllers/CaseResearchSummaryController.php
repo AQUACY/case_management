@@ -40,7 +40,7 @@ class CaseResearchSummaryController extends Controller
         try {
             $validatedData = $request->validate([
                 'case_id' => 'required|exists:cases,id',
-                'field_description' => 'required|string|max:255',
+                'field_description' => 'required|string',
                 'expertise_description' => 'required|string',
                 'work_impact' => 'required|string',
                 'projects' => 'required|array|min:1',
@@ -87,7 +87,7 @@ class CaseResearchSummaryController extends Controller
             $summary = CaseResearchSummary::where('case_id', $caseId)->firstOrFail();
 
             $validatedData = $request->validate([
-                'field_description' => 'sometimes|string|max:255',
+                'field_description' => 'sometimes|string',
                 'expertise_description' => 'sometimes|string',
                 'work_impact' => 'sometimes|string',
                 'projects' => 'sometimes|array|min:1',
@@ -163,4 +163,4 @@ class CaseResearchSummaryController extends Controller
             ], 500);
         }
     }
-} 
+}
