@@ -97,16 +97,26 @@ class AuthController extends BaseController
             $user->roles()->attach($role->id);
 
             // Send credentials email to all new users
-            try {
-                Mail::to($user->email)->send(new NewUserCredentials($user, $request->password));
-            } catch (\Exception $e) {
-                \Log::error('Failed to send credentials email: ' . $e->getMessage());
-                // Continue execution even if email fails
-            }
+           
+
+
 
             // Additional guest-specific email if needed
-            if ($request->role === 'client') {
+            if (strtolower($request->role) === 'client') {
                 $this->sendGuestCredentials($user, $request->password);
+                try {
+                    Mail::to($user->email)->send(new NewUserCredentials($user, $request->password));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send credentials email: ' . $e->getMessage());
+                    // Continue execution even if email fails
+                }
+            }else if (strtolower($request->role) === 'case manager'){
+                try {
+                    Mail::to($user->email)->send(new NewUserCredentialsCasemanager($user, $request->password));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send credentials email: ' . $e->getMessage());
+                    // Continue execution even if email fails
+                }
             }
 
             return response()->json([
