@@ -10,7 +10,11 @@ Your account has been created successfully. Below are your login credentials:
 **Email:** {{ $user->email }}<br/>
 **Password:** {{ $password }}
 
-Please use these credentials to login to your account after your case is created.
+Please use these credentials to login to your account.
+
+@component('mail::button', ['url' => $loginUrl])
+Login Now
+@endcomponent
 
 For security reasons, we recommend changing your password after your first login.
 

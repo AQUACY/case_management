@@ -16,6 +16,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use App\Mail\NewUserCredentials;
+use App\Mail\NewUserCredentialsCasemanager;
 
 class AuthController extends BaseController
 {
