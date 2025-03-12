@@ -4,10 +4,10 @@
 
 Dear {{ $isUser ? $case->user->name : $case->caseManager->name }},
 
-The contract for your case <span class="case-number text-bold">( {{ $case->order_number }} )</span> has been uploaded.
+The contract for the case <span class="case-number text-bold">( {{ $case->order_number }} )</span> has been uploaded.
 
-We have also attached it to this email for your records.
+Attached is the copy of the contract for your records.
 
-Best regards, <br/>
+Best regards,<br/>
 Admin {{ config('app.name') }}
 @endcomponent
