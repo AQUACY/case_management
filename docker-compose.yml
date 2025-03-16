@@ -23,10 +23,10 @@ services:
     container_name: laravel_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: Admin_1908#
-      MYSQL_DATABASE: case
-      MYSQL_USER: root
-      MYSQL_PASSWORD: Admin_1908#
+      MYSQL_ROOT_PASSWORD: Thisisok
+      MYSQL_DATABASE: testing
+      MYSQL_USER: testing
+      MYSQL_PASSWORD: Thisisok
     volumes:
       - mysql_data:/var/lib/mysql
 
