@@ -120,11 +120,15 @@ Route::group([
 
 
     // messging converstation
+    Route::post('/messages/{messageId}/reply', [MessageController::class, 'replyToMessage']);
+    Route::get('/messages/{messageId}/conversation', [MessageController::class, 'getMessageConversation']);
+    Route::get('/messages/unread-count', [MessageController::class, 'getUnreadMessageCount']);
+    Route::get('/messages/categories', [MessageController::class, 'getMessageCategories']);
 
-Route::post('/messages/{messageId}/reply', [MessageController::class, 'replyToMessage']);
-Route::get('/messages/{messageId}/conversation', [MessageController::class, 'getMessageConversation']);
-Route::get('/messages/unread-count', [MessageController::class, 'getUnreadMessageCount']);
-Route::get('/messages/categories', [MessageController::class, 'getMessageCategories']);
+    // Add these new real-time chat routes
+    Route::get('/messages/{messageId}/updates', [MessageController::class, 'getConversationUpdates']);
+    Route::get('/messages/conversations', [MessageController::class, 'getActiveConversations']);
+    Route::post('/messages/conversation/{conversationId}/mark-read', [MessageController::class, 'markConversationMessageAsRead']);
 
     // Add this new route
     Route::post('/messages/{messageId}/read', [MessageController::class, 'markAsRead']);
@@ -278,5 +282,13 @@ Route::post('password/reset', [AuthController::class, 'resetPassword']);
 //     return $request->user();
 
 // })->middleware('auth:sanctum');
+
+// Message routes
+Route::middleware('auth:sanctum')->group(function () {
+    // Existing message routes
+    // ... existing code ...
+
+
+});
 
 
