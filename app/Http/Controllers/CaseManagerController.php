@@ -280,6 +280,32 @@ public function archive($id)
     ], 200);
 }
 
+    // Activate an archived case
+    public function activate($id)
+    {
+        // Find the case
+        $case = Cases::findOrFail($id);
+
+        // Check if the case is archived
+        if ($case->status !== 'archived') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Case is not archived',
+            ], 400);
+        }
+
+        // Update the status to 'active'
+        $case->status = 'active';
+        $case->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Case activated successfully',
+            'data' => $case,
+        ], 200);
+    }
+
+
     // // Assign the case to a case manager
     // public function assignCaseManager(Request $request, $caseId)
     // {

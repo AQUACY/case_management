@@ -14,7 +14,7 @@ class PublicationRecordController extends Controller
     {
         try{
         $validatedData = $request->validate([
-            'peer_reviewed_journal_articless' => 'nullable|integer|min:0',
+            'peer_reviewed_journal_articles' => 'nullable|integer|min:0',
             'notes_peer_reviewed_journal' => 'nullable|string',
             'peer_reviewed_conference_articles' => 'nullable|integer|min:0',
             'notes_peer_reviewed_conference' => 'nullable|string',
