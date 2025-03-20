@@ -233,6 +233,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/admin/createcase', [CaseManagerController::class, 'store']);
     Route::patch('/admin/updatecase/{id}', [CaseManagerController::class, 'update']);
     Route::patch('/admin/archivecase/{id}', [CaseManagerController::class, 'archive']);
+    Route::patch('/admin/activatecase/{id}', [CaseManagerController::class, 'activate']);
     Route::get('/admin/viewallcase', [CaseManagerController::class, 'index']);
     Route::get('/admin/viewcase/{caseId}', [CaseManagerController::class, 'show']);
     Route::post('/admin/update/{caseId}/contractfile', [CaseManagerController::class, 'uploadContractFile']);
